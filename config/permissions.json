@@ -1,0 +1,32 @@
+{
+  "permissions": [
+    "profile.view.own",
+    "profile.edit.own",
+    "user.view.any",
+    "user.edit.any",
+    "user.ban",
+    "user.unban",
+    "user.roles.assign",
+    "audit.view",
+    "task.create",
+    "task.view.any",
+    "task.view.own",
+    "task.edit.own",
+    "task.publish.own",
+    "task.close.own",
+    "task.moderate.any",
+    "task.status.change.any",
+    "bid.create",
+    "bid.withdraw.own",
+    "bid.view.own",
+    "bid.view.on_own_tasks",
+    "bid.moderate.any",
+    "review.create",
+    "complaint.create",
+    "complaint.view.any",
+    "complaint.resolve.any",
+    "category.manage",
+    "tag.manage",
+    "settings.manage"
+  ]
+}

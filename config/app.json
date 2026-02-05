@@ -1,0 +1,10 @@
+{
+  "feature_flags": {
+    "premoderation": false,
+    "reply_keyboard": false
+  },
+  "limits": {
+    "tasks_per_minute": 2,
+    "bids_per_minute": 3
+  }
+}

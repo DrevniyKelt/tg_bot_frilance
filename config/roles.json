@@ -1,0 +1,66 @@
+{
+  "roles": {
+    "Guest": [
+      "task.view.any",
+      "profile.view.own"
+    ],
+    "Executor": [
+      "profile.view.own",
+      "profile.edit.own",
+      "task.view.any",
+      "bid.create",
+      "bid.withdraw.own",
+      "bid.view.own",
+      "complaint.create",
+      "review.create"
+    ],
+    "Customer": [
+      "profile.view.own",
+      "profile.edit.own",
+      "task.create",
+      "task.view.own",
+      "task.edit.own",
+      "task.publish.own",
+      "task.close.own",
+      "bid.view.on_own_tasks",
+      "complaint.create",
+      "review.create"
+    ],
+    "Moderator": [
+      "task.moderate.any",
+      "bid.moderate.any",
+      "complaint.view.any",
+      "complaint.resolve.any",
+      "user.view.any"
+    ],
+    "Admin": [
+      "task.moderate.any",
+      "bid.moderate.any",
+      "complaint.view.any",
+      "complaint.resolve.any",
+      "user.view.any",
+      "user.edit.any",
+      "user.ban",
+      "user.unban",
+      "user.roles.assign",
+      "category.manage",
+      "tag.manage",
+      "audit.view"
+    ],
+    "SuperAdmin": [
+      "task.moderate.any",
+      "bid.moderate.any",
+      "complaint.view.any",
+      "complaint.resolve.any",
+      "user.view.any",
+      "user.edit.any",
+      "user.ban",
+      "user.unban",
+      "user.roles.assign",
+      "category.manage",
+      "tag.manage",
+      "audit.view",
+      "settings.manage"
+    ]
+  }
+}
