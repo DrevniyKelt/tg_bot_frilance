@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="detail-grid">
+    <article class="card detail-panel">
+      <span class="eyebrow">{{ order.category }}</span>
+      <h1>{{ order.title }}</h1>
+      <p class="lead">{{ order.summary }}</p>
+
+      <div class="tag-row">
+        {% for stack in order.stacks %}
+          <span class="tag-chip">{{ stack }}</span>
+        {% endfor %}
+      </div>
+
+      <div class="detail-block">
+        <h3>Описание</h3>
+        <p>{{ order.description }}</p>
+      </div>
+
+      <div class="detail-block">
+        <h3>Автофильтры</h3>
+        <div class="tag-row">
+          {% for key, value in order.auto_filters.items() if value %}
+            <span class="tag-chip">{{ key }}: {{ value }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    </article>
+
+    <aside class="card detail-sidebar">
+      <h2>Бюджет и комиссия</h2>
+      <dl class="metric-grid metric-grid--single">
+        <div>
+          <dt>Исполнителю</dt>
+          <dd>{{ format_money(order.executor_amount) }} {{ order.currency }}</dd>
+        </div>
+        <div>
+          <dt>Заказчику к оплате</dt>
+          <dd>{{ format_money(order.client_total_amount) }} {{ order.currency }}</dd>
+        </div>
+        <div>
+          <dt>Тип бюджета</dt>
+          <dd>{{ order.budget_type }}</dd>
+        </div>
+        <div>
+          <dt>Пост-модерация</dt>
+          <dd>Активна</dd>
+        </div>
+      </dl>
+
+      <div class="stacked-actions">
+        <a class="button" href="/swipe?target=executors">Искать исполнителей</a>
+        <a class="button button--secondary" href="/catalog">Вернуться в каталог</a>
+      </div>
+    </aside>
+  </section>
+{% endblock %}

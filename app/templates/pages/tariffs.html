@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="section-heading">
+    <div>
+      <span class="eyebrow">{{ t('tariffs.title') }}</span>
+      <h1>Тарифы, лимиты и доп. пакеты</h1>
+    </div>
+  </section>
+
+  <section class="card-grid">
+    {% for tariff in tariffs %}
+      <article class="card pricing-card pricing-card--full">
+        <span class="eyebrow">{{ tariff.code }}</span>
+        <h2>{{ tariff.name_ru }}</h2>
+        <span class="pricing-card__price">{{ format_money(tariff.price_rub) }} RUB / {{ tariff.period_days }} days</span>
+        <ul class="plain-list">
+          <li>{{ tariff.create_orders_per_day }} публикаций в день</li>
+          <li>{{ tariff.bids_per_day }} откликов в день</li>
+          <li>{{ "Priority application" if tariff.priority_application else "Base application ranking" }}</li>
+          <li>{{ "Ads off" if tariff.ads_disabled else "Ads reduced" }}</li>
+        </ul>
+      </article>
+    {% endfor %}
+  </section>
+
+  <section class="section">
+    <div class="section-heading section-heading--compact">
+      <div>
+        <span class="eyebrow">Add-on packs</span>
+        <h2>Лимиты можно расширять отдельно</h2>
+      </div>
+    </div>
+
+    <div class="card-grid">
+      {% for addon in addons %}
+        <article class="card pricing-card pricing-card--compact">
+          <strong>{{ addon.name_ru }}</strong>
+          <span class="pricing-card__price">{{ format_money(addon.price_rub) }} RUB</span>
+          <p class="muted">
+            +{{ addon.extra_orders }} публикаций · +{{ addon.extra_bids }} откликов
+          </p>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}

@@ -1,0 +1,1 @@
+"""SkillLane application package."""

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="section-heading">
+    <div>
+      <span class="eyebrow">{{ t('catalog.title') }}</span>
+      <h1>{{ t('catalog.subtitle') }}</h1>
+    </div>
+  </section>
+
+  <section class="layout-columns">
+    <aside class="card sidebar">
+      <form method="get" class="filter-form">
+        <label>
+          <span>{{ t('common.search') }}</span>
+          <input type="text" name="q" value="{{ filters.q }}" placeholder="FastAPI, DevOps, Figma..." />
+        </label>
+        <label>
+          <span>Stack / synonym</span>
+          <input type="text" name="stack" value="{{ filters.stack }}" placeholder="js, python, k8s" />
+        </label>
+        <label>
+          <span>Budget from</span>
+          <input type="number" name="min_budget" value="{{ filters.min_budget }}" min="0" step="1000" />
+        </label>
+        <label>
+          <span>Budget to</span>
+          <input type="number" name="max_budget" value="{{ filters.max_budget }}" min="0" step="1000" />
+        </label>
+        <label>
+          <span>Status</span>
+          <select name="status">
+            <option value="">any</option>
+            {% for option in ["published", "matched", "in_progress", "completed"] %}
+              <option value="{{ option }}" {{ "selected" if filters.status == option else "" }}>{{ option }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <button class="button" type="submit">{{ t('common.filters') }}</button>
+        <a class="button button--secondary" href="/catalog">{{ t('common.reset') }}</a>
+      </form>
+
+      <div class="sidebar__group">
+        <strong>Canonical stack after normalization</strong>
+        <div class="tag-row">
+          {% for tag in orders.normalized_stack_filters %}
+            <span class="tag-chip">{{ tag }}</span>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="sidebar__group">
+        <strong>Catalog snapshot</strong>
+        {% for category in stack_catalog[:4] %}
+          <div class="catalog-listing">
+            <span>{{ category.name }}</span>
+            <small>{{ category.tags|length }} tags</small>
+          </div>
+        {% endfor %}
+      </div>
+    </aside>
+
+    <div class="content-grid">
+      <div class="section-heading section-heading--compact">
+        <div>
+          <span class="eyebrow">{{ orders.total }} jobs</span>
+          <h2>Результаты поиска</h2>
+        </div>
+        <a class="button button--secondary" href="/orders/new">{{ t('nav.new_order') }}</a>
+      </div>
+
+      {% if orders.items %}
+        <div class="card-grid card-grid--orders">
+          {% for order in orders.items %}
+            {% include "components/order_card.html" %}
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="card empty-state">
+          <h3>{{ t('catalog.empty') }}</h3>
+          <p class="muted">Попробуй расширить стек или убрать часть фильтров.</p>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+{% endblock %}

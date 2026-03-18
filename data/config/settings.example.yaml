@@ -1,0 +1,29 @@
+app:
+  name: SkillLane
+  brand_tagline: IT freelance exchange for Telegram and web
+  secret_key: replace-with-strong-secret
+  default_locale: ru
+  base_url: https://example.com
+
+database:
+  url: postgresql+asyncpg://skilllane:skilllane@localhost:5432/skilllane
+  echo: false
+
+telegram:
+  bot_token: "123456:replace-me"
+  allow_dev_login: false
+
+demo:
+  seed_data: true
+  default_user_id: 1
+
+features:
+  fee_mode: deduct
+  fee_percent: 0.01
+  require_tariff_after_first_completed: true
+  new_user_max_orders: 5
+  new_user_max_applications: 100
+  new_user_max_matches: 3
+  new_user_max_unmatched_applications_per_week: 50
+  swipe_min_similarity: 0.5
+  swipe_mix_strategy: mixed

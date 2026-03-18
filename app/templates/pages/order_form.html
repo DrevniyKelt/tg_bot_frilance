@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="section-heading">
+    <div>
+      <span class="eyebrow">{{ t('order.new_title') }}</span>
+      <h1>Публикация без редактирования после выхода в каталог</h1>
+    </div>
+  </section>
+
+  <section class="layout-columns">
+    <form method="post" class="card form-card">
+      {% if error %}
+        <div class="alert">{{ error }}</div>
+      {% endif %}
+
+      <div class="form-grid">
+        <label>
+          <span>Название</span>
+          <input type="text" name="title" value="{{ form_data.title or '' }}" required />
+        </label>
+        <label>
+          <span>Категория</span>
+          <input type="text" name="category" value="{{ form_data.category or '' }}" required />
+        </label>
+        <label class="full">
+          <span>Короткое summary</span>
+          <input type="text" name="summary" value="{{ form_data.summary or '' }}" required />
+        </label>
+        <label class="full">
+          <span>Описание</span>
+          <textarea name="description" rows="8" required>{{ form_data.description or '' }}</textarea>
+        </label>
+        <label>
+          <span>Budget type</span>
+          <select name="budget_type">
+            <option value="fixed" {{ "selected" if form_data.budget_type == 'fixed' else '' }}>fixed</option>
+            <option value="auction" {{ "selected" if form_data.budget_type == 'auction' else '' }}>auction</option>
+          </select>
+        </label>
+        <label>
+          <span>Currency</span>
+          <select name="currency">
+            {% for option in ["RUB", "ETH", "INTERNAL"] %}
+              <option value="{{ option }}" {{ "selected" if form_data.currency == option else "" }}>{{ option }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label>
+          <span>Stack mode</span>
+          <select name="stack_mode">
+            <option value="specific" {{ "selected" if form_data.stack_mode != 'free' else '' }}>specific</option>
+            <option value="free" {{ "selected" if form_data.stack_mode == 'free' else '' }}>free</option>
+          </select>
+        </label>
+        <label>
+          <span>Budget</span>
+          <input
+            type="number"
+            name="budget_amount"
+            value="{{ form_data.budget_amount or 20000 }}"
+            min="1"
+            step="100"
+            data-budget-input
+          />
+        </label>
+        <label>
+          <span>Min rating</span>
+          <input type="number" name="min_rating" value="{{ form_data.min_rating or 4.7 }}" step="0.1" min="0" max="5" />
+        </label>
+        <label>
+          <span>Delivery days</span>
+          <input type="number" name="delivery_days" value="{{ form_data.delivery_days or 14 }}" min="1" />
+        </label>
+        <label>
+          <span>Priority</span>
+          <select name="priority">
+            {% for option in ["balanced", "mixed", "strict"] %}
+              <option value="{{ option }}" {{ "selected" if form_data.priority == option else "" }}>{{ option }}</option>
+            {% endfor %}
+          </select>
+        </label>
+      </div>
+
+      <div class="stack-picker" data-tag-picker data-input-id="order-stack-input">
+        <div class="section-heading section-heading--compact">
+          <div>
+            <span class="eyebrow">Stack</span>
+            <h2>До 30 тегов, синонимы нормализуются</h2>
+          </div>
+        </div>
+        {% set selected_order_stack = form_data.stack_slugs or '' %}
+        <input type="hidden" id="order-stack-input" name="stack_slugs" value="{{ selected_order_stack }}" />
+        {% for category in stack_catalog %}
+          <div class="stack-group">
+            <h3>{{ category.name }}</h3>
+            <div class="tag-row">
+              {% for tag in category.tags %}
+                <button
+                  type="button"
+                  class="tag-chip tag-chip--interactive {{ 'is-selected' if tag.slug in selected_order_stack else '' }}"
+                  data-tag-value="{{ tag.slug }}"
+                >
+                  {{ tag.name }}
+                </button>
+              {% endfor %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <button class="button" type="submit">{{ t('common.create') }}</button>
+    </form>
+
+    <aside class="card preview-card">
+      <span class="eyebrow">{{ t('order.preview') }}</span>
+      <h2>Комиссия считается сразу</h2>
+      <div class="metric-grid metric-grid--single" data-budget-preview data-fee-percent="{{ preview.fee_percent if preview else '1' }}">
+        <div>
+          <dt>Исполнитель увидит</dt>
+          <dd data-preview-executor>{{ preview.executor_amount if preview else '20 000' }}</dd>
+        </div>
+        <div>
+          <dt>Заказчик оплатит</dt>
+          <dd data-preview-client>{{ preview.client_total_amount if preview else '20 200' }}</dd>
+        </div>
+        <div>
+          <dt>Комиссия</dt>
+          <dd><span data-preview-fee>{{ preview.fee_percent if preview else '1' }}</span>%</dd>
+        </div>
+      </div>
+      <p class="muted">
+        При режиме `deduct`, выбранном по ответам в `project_questions_answers.md`, клиент всё равно видит сумму с
+        надбавкой комиссии, а исполнитель чистый бюджет заказа.
+      </p>
+    </aside>
+  </section>
+{% endblock %}

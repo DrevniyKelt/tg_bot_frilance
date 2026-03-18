@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="section-heading">
+    <div>
+      <span class="eyebrow">{{ t('swipe.title') }}</span>
+      <h1>Смешанная релевантность вместо жёсткой сортировки</h1>
+    </div>
+  </section>
+
+  <section class="swipe-layout">
+    <aside class="card swipe-rail">
+      <form method="get" class="filter-form">
+        <label>
+          <span>Target</span>
+          <select name="target">
+            <option value="orders" {{ "selected" if target == 'orders' else "" }}>orders</option>
+            <option value="executors" {{ "selected" if target == 'executors' else "" }}>executors</option>
+          </select>
+        </label>
+        <label>
+          <span>Stack filter</span>
+          <input type="text" name="stack" value="{{ stack_filter }}" placeholder="python, react, figma" />
+        </label>
+        <button class="button" type="submit">{{ t('common.filters') }}</button>
+      </form>
+
+      <div class="swipe-list">
+        {% for card in cards %}
+          <button type="button" class="swipe-list__item {{ 'is-active' if loop.first else '' }}" data-swipe-target="{{ loop.index0 }}">
+            <strong>{{ card.title }}</strong>
+            <small>{{ (card.similarity * 100)|int }}% match</small>
+          </button>
+        {% endfor %}
+      </div>
+    </aside>
+
+    <section class="swipe-stage">
+      {% for card in cards %}
+        <article class="card swipe-card {{ 'is-active' if loop.first else '' }}" data-swipe-card="{{ loop.index0 }}">
+          <span class="eyebrow">{{ card.subtitle }}</span>
+          <h2>{{ card.title }}</h2>
+          <p class="lead">{{ card.description }}</p>
+
+          <div class="tag-row">
+            {% for stack in card.stacks %}
+              <span class="tag-chip">{{ stack }}</span>
+            {% endfor %}
+          </div>
+
+          <div class="metric-grid">
+            <div>
+              <dt>{{ t('common.similarity') }}</dt>
+              <dd>{{ (card.similarity * 100)|int }}%</dd>
+            </div>
+            {% for key, value in card.meta.items() %}
+              <div>
+                <dt>{{ key }}</dt>
+                <dd>{{ value }}</dd>
+              </div>
+            {% endfor %}
+          </div>
+        </article>
+      {% endfor %}
+
+      <div class="swipe-actions">
+        <button type="button" class="button button--secondary" data-swipe-action="prev">Назад</button>
+        <button type="button" class="button" data-swipe-action="next">Следующая карточка</button>
+      </div>
+    </section>
+
+    <aside class="card swipe-rail swipe-rail--notes">
+      <span class="eyebrow">Почему выдача не полностью top-only</span>
+      <ul class="plain-list">
+        <li>в обычном режиме карточки подмешиваются по разной степени релевантности</li>
+        <li>минимальный порог совпадения берётся из feature config</li>
+        <li>для premium later можно переключить стратегию на strict relevance</li>
+      </ul>
+    </aside>
+  </section>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', path='/js/swipe.js') }}" defer></script>
+{% endblock %}

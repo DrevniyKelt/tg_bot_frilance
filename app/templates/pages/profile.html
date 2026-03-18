@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="section-heading">
+    <div>
+      <span class="eyebrow">{{ t('profile.title') }}</span>
+      <h1>{{ t('profile.subtitle') }}</h1>
+    </div>
+  </section>
+
+  <section class="layout-columns">
+    <form method="post" class="card form-card">
+      {% if error %}
+        <div class="alert">{{ error }}</div>
+      {% elif success %}
+        <div class="alert alert--success">Профиль обновлён.</div>
+      {% endif %}
+
+      <div class="form-grid">
+        <label>
+          <span>Display name</span>
+          <input type="text" name="display_name" value="{{ user.display_name if user else '' }}" required />
+        </label>
+        <label>
+          <span>Role</span>
+          <select name="primary_role">
+            {% for role in ["client", "executor", "both"] %}
+              <option value="{{ role }}" {{ "selected" if user and user.role == role else "" }}>{{ role }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label class="full">
+          <span>Headline</span>
+          <input type="text" name="headline" value="{{ user.headline if user else '' }}" />
+        </label>
+        <label class="full">
+          <span>Bio</span>
+          <textarea name="bio" rows="7">{{ user.bio if user else '' }}</textarea>
+        </label>
+      </div>
+
+      {% set selected_profile_stack = user.stack|map(attribute='slug')|join(',') if user else '' %}
+      <div class="stack-picker" data-tag-picker data-input-id="profile-stack-input">
+        <div class="section-heading section-heading--compact">
+          <div>
+            <span class="eyebrow">Stack</span>
+            <h2>Твой стек и контекст выдачи</h2>
+          </div>
+        </div>
+        <input type="hidden" id="profile-stack-input" name="stack_slugs" value="{{ selected_profile_stack }}" />
+        {% for category in stack_catalog %}
+          <div class="stack-group">
+            <h3>{{ category.name }}</h3>
+            <div class="tag-row">
+              {% for tag in category.tags %}
+                <button
+                  type="button"
+                  class="tag-chip tag-chip--interactive {{ 'is-selected' if tag.slug in selected_profile_stack else '' }}"
+                  data-tag-value="{{ tag.slug }}"
+                >
+                  {{ tag.name }}
+                </button>
+              {% endfor %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <button class="button" type="submit">{{ t('common.save') }}</button>
+    </form>
+
+    <aside class="stack-column">
+      <section class="card">
+        <span class="eyebrow">Wallet / rating</span>
+        <dl class="metric-grid metric-grid--single">
+          <div>
+            <dt>Баланс</dt>
+            <dd>{{ format_money(user.wallet_balance) if user else '0' }} RUB</dd>
+          </div>
+          <div>
+            <dt>Executor rating</dt>
+            <dd>{{ user.avg_executor_rating if user else '0' }}</dd>
+          </div>
+          <div>
+            <dt>Client rating</dt>
+            <dd>{{ user.avg_client_rating if user else '0' }}</dd>
+          </div>
+          <div>
+            <dt>Matches</dt>
+            <dd>{{ user.total_matches if user else 0 }}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="card">
+        <span class="eyebrow">Subscription status</span>
+        <h2>{{ user.active_tariff or 'Free' }}</h2>
+        <p class="muted">
+          После первого `completed` без активного тарифа новые публикации и отклики должны блокироваться.
+        </p>
+        <div class="pricing-stack">
+          {% for tariff in tariffs %}
+            <article class="pricing-card pricing-card--compact">
+              <strong>{{ tariff.name_ru }}</strong>
+              <span class="pricing-card__price">{{ format_money(tariff.price_rub) }} RUB</span>
+            </article>
+          {% endfor %}
+        </div>
+      </section>
+    </aside>
+  </section>
+{% endblock %}

@@ -1,0 +1,47 @@
+<article class="card order-card">
+  <div class="order-card__header">
+    <div>
+      <span class="eyebrow">{{ order.category }}</span>
+      <h3>{{ order.title }}</h3>
+    </div>
+    <span class="status-pill">{{ order.status.replace('_', ' ') }}</span>
+  </div>
+
+  <p class="muted">{{ order.summary }}</p>
+
+  <div class="tag-row">
+    {% for stack in order.stacks %}
+      <span class="tag-chip">{{ stack }}</span>
+    {% endfor %}
+  </div>
+
+  <dl class="metric-grid">
+    <div>
+      <dt>Исполнителю</dt>
+      <dd>{{ format_money(order.executor_amount) }} {{ order.currency }}</dd>
+    </div>
+    <div>
+      <dt>Заказчику</dt>
+      <dd>{{ format_money(order.client_total_amount) }} {{ order.currency }}</dd>
+    </div>
+    <div>
+      <dt>Тип</dt>
+      <dd>{{ order.budget_type }}</dd>
+    </div>
+    <div>
+      <dt>Комиссия</dt>
+      <dd>{{ (order.fee_percent * 100) }}%</dd>
+    </div>
+    {% if order.similarity is not none %}
+      <div>
+        <dt>{{ t('common.similarity') }}</dt>
+        <dd>{{ (order.similarity * 100)|int }}%</dd>
+      </div>
+    {% endif %}
+  </dl>
+
+  <div class="order-card__footer">
+    <span class="muted">by {{ order.client_name }}</span>
+    <a class="button button--secondary" href="/orders/{{ order.slug }}">{{ t('common.details') }}</a>
+  </div>
+</article>
