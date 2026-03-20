@@ -1,33 +1,68 @@
-# SkillLane
+<p align="center">
+  <img src="https://img.shields.io/badge/python-3.12-blue" />
+  <img src="https://img.shields.io/badge/FastAPI-009688" />
+  <img src="https://img.shields.io/badge/Poetry-managed-blueviolet" />
+  <img src="https://img.shields.io/badge/tests-4%20passed-brightgreen" />
+  <img src="https://img.shields.io/badge/coverage-70%25-yellow" />
+</p>
 
-Закрытая beta-основа для IT-фриланс биржи из `roadmap1.md`: сайт и Telegram Mini App на одном `FastAPI + Jinja2` приложении.
+<p align="center">
+  <h1 align="center">SkillLane</h1>
+  <p align="center">
+    Закрытая beta-основа для IT-фриланс биржи: сайт и Telegram Mini App
+    на едином приложении <b>FastAPI + Jinja2</b>.
+  </p>
+</p>
 
-Что уже реализовано:
+---
 
-* архитектурный каркас `web/api/core/db/services`
-* Telegram auth endpoint + dev demo-login
-* профиль пользователя, переключение ролей, каталог стека и синонимов
-* создание заказов, листинг, фильтры, поиск по стеку и swipe-режим
-* тарифы и доппакеты в каталоге, расчёт комиссии 0% / 1%
-* seed-данные, OpenAPI, минимальные тесты и CI
+## 🚀 О проекте
 
-Локальный запуск:
+**SkillLane** — это закрытая beta-основа для IT-фриланс биржи, построенная по материалам из `roadmap1.md`.
+
+Проект объединяет:
+
+- веб-сайт
+- Telegram Mini App
+- единый backend на `FastAPI`
+
+Цель текущей версии — собрать рабочее MVP-ядро с базовой логикой заказов, ролей, стека технологий и механикой swipe-подбора.
+
+---
+
+## ✅ Что уже реализовано
+
+- архитектурный каркас: `web / api / core / db / services`
+- Telegram auth endpoint + dev demo-login
+- профиль пользователя
+- переключение ролей
+- каталог стека и синонимов
+- создание заказов
+- листинг заказов
+- фильтры и поиск по стеку
+- swipe / Tinder-режим
+- каталог тарифов и доппакетов
+- расчёт комиссии `0% / 1%`
+- seed-данные
+- OpenAPI документация
+- минимальные тесты и CI
+
+---
+
+## 🛠 Технологии
+
+- Python 3.12
+- FastAPI
+- Jinja2
+- Poetry
+- Pytest
+- OpenAPI
+
+---
+
+## 📦 Установка и локальный запуск
+
+Установка зависимостей:
 
 ```bash
-python3 -m venv .venv-local
-source .venv-local/bin/activate
-pip install -e ".[dev]"
-uvicorn app.main:create_app --factory --reload
-```
-
-По умолчанию настройки читаются из `data/config/settings.yaml`.
-
-Полезные URL:
-
-* `/` лендинг и точка входа
-* `/catalog` каталог заказов
-* `/orders/new` создание заказа
-* `/profile` профиль и стек
-* `/swipe` swipe/Tinder режим
-* `/docs` OpenAPI
-* `/auth/demo/1` быстрая dev-авторизация
+poetry install --with dev

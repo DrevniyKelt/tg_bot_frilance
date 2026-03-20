@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["poetry-core>=1.9.0"]
+build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "skilllane"
@@ -20,16 +20,22 @@ dependencies = [
   "uvicorn[standard]>=0.34.0",
 ]
 
-[project.optional-dependencies]
-dev = [
-  "httpx>=0.28.1",
-  "pytest>=8.3.5",
+[tool.poetry]
+packages = [{ include = "app" }]
+include = [
+  { path = "app/static", format = ["sdist", "wheel"] },
+  { path = "app/templates", format = ["sdist", "wheel"] },
+  { path = "data/config", format = ["sdist", "wheel"] },
 ]
 
 [tool.pytest.ini_options]
-addopts = "-q"
-pythonpath = ["."]
 testpaths = ["tests"]
+python_files = ["test_*.py"]
+pythonpath = ["."]
+addopts = "-q --basetemp=.pytest_temp"
 
-[tool.setuptools.packages.find]
-include = ["app*"]
+[tool.poetry.group.dev.dependencies]
+httpx = ">=0.28.1"
+pytest = ">=8.3.5"
+pytest-cov = "^7.0.0"
+

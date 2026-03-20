@@ -206,3 +206,28 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+
+# Python
+__pycache__/
+*.pyc
+
+# pytest
+.pytest_cache/
+.pytest_temp/
+.pytest-tmp*
+pytest-cache-files-*
+
+# database
+*.db
+
+# env
+.venv/
+
+# coverage
+.coverage
+htmlcov/
+
+# OS
+.DS_Store
+Thumbs.db
