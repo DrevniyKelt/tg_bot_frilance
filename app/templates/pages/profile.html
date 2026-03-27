@@ -13,7 +13,7 @@
       {% if error %}
         <div class="alert">{{ error }}</div>
       {% elif success %}
-        <div class="alert alert--success">Профиль обновлён.</div>
+        <div class="alert alert--success">{{ t('profile.updated') }}</div>
       {% endif %}
 
       <div class="form-grid">
@@ -44,7 +44,7 @@
         <div class="section-heading section-heading--compact">
           <div>
             <span class="eyebrow">Stack</span>
-            <h2>Твой стек и контекст выдачи</h2>
+            <h2>{{ t('profile.stack_context') }}</h2>
           </div>
         </div>
         <input type="hidden" id="profile-stack-input" name="stack_slugs" value="{{ selected_profile_stack }}" />
@@ -67,14 +67,15 @@
       </div>
 
       <button class="button" type="submit">{{ t('common.save') }}</button>
+      <a class="button button--secondary" href="/me/orders">{{ t('nav.my_orders') }}</a>
     </form>
 
     <aside class="stack-column">
       <section class="card">
-        <span class="eyebrow">Wallet / rating</span>
+        <span class="eyebrow">{{ t('profile.wallet_rating') }}</span>
         <dl class="metric-grid metric-grid--single">
           <div>
-            <dt>Баланс</dt>
+            <dt>{{ t('profile.balance') }}</dt>
             <dd>{{ format_money(user.wallet_balance) if user else '0' }} RUB</dd>
           </div>
           <div>
@@ -93,15 +94,79 @@
       </section>
 
       <section class="card">
+        <span class="eyebrow">Wallet actions</span>
+        {% if wallet_error %}
+          <div class="alert">{{ wallet_error }}</div>
+        {% endif %}
+        <form method="post" action="/wallet/topup" class="filter-form">
+          <div class="form-grid">
+            <label>
+              <span>{{ t('profile.topup') }}</span>
+              <input type="number" name="amount" min="1" step="100" value="5000" required />
+            </label>
+            <label>
+              <span>{{ t('profile.currency') }}</span>
+              <select name="currency">
+                {% for option in ["RUB", "ETH", "INTERNAL"] %}
+                  <option value="{{ option }}">{{ option }}</option>
+                {% endfor %}
+              </select>
+            </label>
+          </div>
+          <input type="hidden" name="note" value="Mock top-up from profile" />
+          <button class="button" type="submit">{{ t('profile.topup_btn') }}</button>
+        </form>
+
+        <form method="post" action="/wallet/withdraw" class="filter-form">
+          <div class="form-grid">
+            <label>
+              <span>{{ t('profile.withdraw') }}</span>
+              <input type="number" name="amount" min="1" step="100" value="1000" required />
+            </label>
+            <label>
+              <span>{{ t('profile.currency') }}</span>
+              <select name="currency">
+                {% for option in ["RUB", "ETH", "INTERNAL"] %}
+                  <option value="{{ option }}">{{ option }}</option>
+                {% endfor %}
+              </select>
+            </label>
+          </div>
+          <input type="hidden" name="note" value="Mock withdraw from profile" />
+          <button class="button button--secondary" type="submit">{{ t('profile.withdraw_btn') }}</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <span class="eyebrow">Wallet ledger</span>
+        {% if wallet_transactions %}
+          <div class="stacked-actions">
+            {% for tx in wallet_transactions %}
+              <div class="catalog-listing">
+                <span>
+                  <strong>{{ tx.kind }}</strong>
+                  <small>{{ tx.note }}</small>
+                </span>
+                <span>
+                  <strong>{{ format_money(tx.amount) }} {{ tx.currency }}</strong>
+                  <small>balance: {{ format_money(tx.balance_after) }}</small>
+                </span>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="muted">{{ t('profile.no_transactions') }}</p>
+        {% endif %}
+      </section>
+
+      <section class="card">
         <span class="eyebrow">Subscription status</span>
         <h2>{{ user.active_tariff or 'Free' }}</h2>
-        <p class="muted">
-          После первого `completed` без активного тарифа новые публикации и отклики должны блокироваться.
-        </p>
+        <p class="muted">{{ t('profile.subscription_text') }}</p>
         <div class="pricing-stack">
           {% for tariff in tariffs %}
             <article class="pricing-card pricing-card--compact">
-              <strong>{{ tariff.name_ru }}</strong>
+              <strong>{{ tariff.name_ru if lang == 'ru' else tariff.name_en }}</strong>
               <span class="pricing-card__price">{{ format_money(tariff.price_rub) }} RUB</span>
             </article>
           {% endfor %}

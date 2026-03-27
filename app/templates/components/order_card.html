@@ -17,19 +17,19 @@
 
   <dl class="metric-grid">
     <div>
-      <dt>Исполнителю</dt>
+      <dt>{{ t('order.to_executor') }}</dt>
       <dd>{{ format_money(order.executor_amount) }} {{ order.currency }}</dd>
     </div>
     <div>
-      <dt>Заказчику</dt>
+      <dt>{{ t('order.to_client') }}</dt>
       <dd>{{ format_money(order.client_total_amount) }} {{ order.currency }}</dd>
     </div>
     <div>
-      <dt>Тип</dt>
+      <dt>{{ t('order.budget_type') }}</dt>
       <dd>{{ order.budget_type }}</dd>
     </div>
     <div>
-      <dt>Комиссия</dt>
+      <dt>{{ t('order.commission') }}</dt>
       <dd>{{ (order.fee_percent * 100) }}%</dd>
     </div>
     {% if order.similarity is not none %}

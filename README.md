@@ -66,3 +66,27 @@
 
 ```bash
 poetry install --with dev
+```
+
+Запуск сайта:
+
+```bash
+poetry run uvicorn app.main:app --reload
+```
+
+Запуск Telegram-бота:
+
+```bash
+poetry run python -m app.bot.main
+```
+
+Для бота нужен `telegram.bot_token` в `data/config/settings.yaml` или переменная `APP_TELEGRAM_BOT_TOKEN`.
+
+Базовые команды бота:
+
+- `/start`
+- `/help`
+- `/profile`
+- `/orders`
+- `/catalog`
+- `/swipe`

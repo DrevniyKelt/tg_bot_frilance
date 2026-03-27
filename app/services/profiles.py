@@ -16,7 +16,8 @@ from app.services.catalog import resolve_stack_tags
 async def resolve_current_user(session: AsyncSession, request: Request) -> User | None:
     settings = get_settings()
     user_id = request.session.get("user_id")
-    if user_id is None and settings.telegram.allow_dev_login:
+    test_mode_enabled = request.session.get("test_mode_enabled", settings.telegram.allow_dev_login)
+    if user_id is None and test_mode_enabled:
         user_id = settings.demo.default_user_id
         request.session["user_id"] = user_id
     if user_id is None:

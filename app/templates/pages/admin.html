@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="section-heading">
+    <div>
+      <span class="eyebrow">Admin</span>
+      <h1>Модерация, пользователи и рекламные слоты</h1>
+    </div>
+  </section>
+
+  <section class="section split">
+    <div class="stack-column">
+      <section class="card">
+        <span class="eyebrow">Moderation tickets</span>
+        {% if tickets %}
+          <div class="stacked-actions">
+            {% for ticket in tickets %}
+              <article class="card">
+                <div class="order-card__header">
+                  <span>
+                    <strong>#{{ ticket.id }} · {{ ticket.target_type }}</strong>
+                    <small>{{ ticket.reason }}</small>
+                  </span>
+                  <span class="status-pill">{{ ticket.status }}</span>
+                </div>
+                {% if ticket.status == 'open' %}
+                  <form method="post" action="/admin/tickets/{{ ticket.id }}/resolve">
+                    <button class="button button--secondary" type="submit">Закрыть тикет</button>
+                  </form>
+                {% endif %}
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="muted">Тикетов пока нет.</p>
+        {% endif %}
+      </section>
+
+      <section class="card">
+        <span class="eyebrow">Ad campaigns</span>
+        <div class="stacked-actions">
+          {% for campaign in campaigns %}
+            <div class="catalog-listing">
+              <span>
+                <strong>{{ campaign.title }}</strong>
+                <small>{{ campaign.placement_name }}</small>
+              </span>
+              <span>
+                <strong>{{ campaign.impressions_count }} imp</strong>
+                <small>{{ campaign.clicks_count }} clicks</small>
+              </span>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+
+    <div class="stack-column">
+      <section class="card">
+        <span class="eyebrow">Orders</span>
+        <div class="stacked-actions">
+          {% for order in admin_orders %}
+            <article class="card">
+              <div class="order-card__header">
+                <span>
+                  <strong>{{ order.title }}</strong>
+                  <small>{{ order.status }}</small>
+                </span>
+                <form method="post" action="/admin/orders/{{ order.slug }}/hide">
+                  <button class="button button--secondary" type="submit">Скрыть</button>
+                </form>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section class="card">
+        <span class="eyebrow">Users</span>
+        <div class="stacked-actions">
+          {% for item in admin_users %}
+            <article class="card">
+              <div class="order-card__header">
+                <span>
+                  <strong>{{ item.display_name }}</strong>
+                  <small>{{ item.role }} · completed {{ item.completed_deals }}</small>
+                </span>
+                <form method="post" action="/admin/users/{{ item.id }}/ban">
+                  <button class="button button--secondary" type="submit">Ban</button>
+                </form>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+  </section>
+{% endblock %}

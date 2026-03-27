@@ -1,0 +1,47 @@
+{
+  "base_url": "http://127.0.0.1:8000",
+  "screens": [
+    {
+      "name": "home",
+      "url": "http://127.0.0.1:8000/",
+      "path_desktop": "desktop/home.png",
+      "path_mobile": "mobile/home.png"
+    },
+    {
+      "name": "catalog",
+      "url": "http://127.0.0.1:8000/catalog",
+      "path_desktop": "desktop/catalog.png",
+      "path_mobile": "mobile/catalog.png"
+    },
+    {
+      "name": "order_detail",
+      "url": "http://127.0.0.1:8000/orders/telegram-mini-app-fastapi-launch",
+      "path_desktop": "desktop/order_detail.png",
+      "path_mobile": "mobile/order_detail.png"
+    },
+    {
+      "name": "new_order",
+      "url": "http://127.0.0.1:8000/orders/new",
+      "path_desktop": "desktop/new_order.png",
+      "path_mobile": "mobile/new_order.png"
+    },
+    {
+      "name": "profile",
+      "url": "http://127.0.0.1:8000/profile",
+      "path_desktop": "desktop/profile.png",
+      "path_mobile": "mobile/profile.png"
+    },
+    {
+      "name": "swipe",
+      "url": "http://127.0.0.1:8000/swipe",
+      "path_desktop": "desktop/swipe.png",
+      "path_mobile": "mobile/swipe.png"
+    },
+    {
+      "name": "tariffs",
+      "url": "http://127.0.0.1:8000/tariffs",
+      "path_desktop": "desktop/tariffs.png",
+      "path_mobile": "mobile/tariffs.png"
+    }
+  ]
+}

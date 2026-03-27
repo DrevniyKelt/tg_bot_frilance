@@ -28,6 +28,7 @@ class DatabaseSection:
 class TelegramSection:
     bot_token: str = ""
     allow_dev_login: bool = True
+    bot_username: str = "skilllane_beta_bot"
 
 
 @dataclass(frozen=True)

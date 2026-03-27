@@ -19,6 +19,10 @@ class OrderCardResponse(BaseModel):
     executor_amount: Decimal
     client_total_amount: Decimal
     fee_percent: Decimal
+    escrow_status: str
+    escrow_amount: Decimal
+    client_completion_confirmed: bool
+    executor_completion_confirmed: bool
     auto_filters: dict[str, Any]
     stacks: list[str]
     client_name: str
@@ -55,3 +59,12 @@ class SwipeCardResponse(BaseModel):
     stacks: list[str]
     similarity: float
     meta: dict[str, Any]
+    action_url: str | None = None
+    match_ready: bool = False
+    match_label: str | None = None
+    selected_by_you: bool = False
+    selected_you: bool = False
+    rejected_by_you: bool = False
+    rejected_you: bool = False
+    status_label: str | None = None
+    status_tone: Literal["neutral", "accept", "reject", "match"] = "neutral"

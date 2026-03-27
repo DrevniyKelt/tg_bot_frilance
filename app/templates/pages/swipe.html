@@ -4,20 +4,34 @@
   <section class="section-heading">
     <div>
       <span class="eyebrow">{{ t('swipe.title') }}</span>
-      <h1>Смешанная релевантность вместо жёсткой сортировки</h1>
+      <h1>{{ "Свайп-лента мэтчей" if lang == 'ru' else "Swipe match feed" }}</h1>
     </div>
   </section>
 
   <section class="swipe-layout">
     <aside class="card swipe-rail">
-      <form method="get" class="filter-form">
+      <form method="get" class="filter-form" data-swipe-filter-form>
         <label>
-          <span>Target</span>
-          <select name="target">
-            <option value="orders" {{ "selected" if target == 'orders' else "" }}>orders</option>
-            <option value="executors" {{ "selected" if target == 'executors' else "" }}>executors</option>
+          <span>{{ "Режим" if lang == 'ru' else "Mode" }}</span>
+          <select name="target" data-swipe-autosubmit>
+            <option value="executors" {{ "selected" if target == 'executors' else "" }}>{{ "Я заказчик: ищу исполнителей" if lang == 'ru' else "I am a client: show executors" }}</option>
+            <option value="orders" {{ "selected" if target == 'orders' else "" }}>{{ "Я исполнитель: ищу заказы" if lang == 'ru' else "I am an executor: show orders" }}</option>
           </select>
         </label>
+
+        {% if target == 'executors' and source_orders %}
+          <label>
+            <span>{{ "Заказ для поиска" if lang == 'ru' else "Source order" }}</span>
+            <select name="source_order_id" data-swipe-autosubmit>
+              {% for order in source_orders %}
+                <option value="{{ order.id }}" {{ "selected" if selected_source_order and selected_source_order.id == order.id else "" }}>
+                  {{ order.title }}
+                </option>
+              {% endfor %}
+            </select>
+          </label>
+        {% endif %}
+
         <label>
           <span>Stack filter</span>
           <input type="text" name="stack" value="{{ stack_filter }}" placeholder="python, react, figma" />
@@ -25,59 +39,165 @@
         <button class="button" type="submit">{{ t('common.filters') }}</button>
       </form>
 
+      <div class="swipe-hint">
+        <strong>{{ "Влево — отказ, вправо — принять" if lang == 'ru' else "Left to reject, right to accept" }}</strong>
+        <p class="muted">
+          {{ "Если выбор взаимный, появится мэтч, конфетти и ссылка в чат." if lang == 'ru' else "When the choice becomes mutual, you get a match, confetti, and a chat link." }}
+        </p>
+        <p class="muted">
+          {{ "Сейчас в колоде исполнители под выбранный заказ." if lang == 'ru' and target == 'executors' else "Сейчас в колоде заказы, которые подходят тебе." if lang == 'ru' else "Now showing executors for the selected order." if target == 'executors' else "Now showing orders that fit your stack." }}
+        </p>
+      </div>
+
       <div class="swipe-list">
         {% for card in cards %}
-          <button type="button" class="swipe-list__item {{ 'is-active' if loop.first else '' }}" data-swipe-target="{{ loop.index0 }}">
+          <button
+            type="button"
+            class="swipe-list__item {{ 'is-active' if loop.first else '' }}"
+            data-swipe-target="{{ loop.index0 }}"
+          >
             <strong>{{ card.title }}</strong>
             <small>{{ (card.similarity * 100)|int }}% match</small>
+            {% if card.status_label %}
+              <span class="swipe-list__badge swipe-list__badge--{{ card.status_tone }}">{{ card.status_label }}</span>
+            {% endif %}
           </button>
         {% endfor %}
       </div>
     </aside>
 
-    <section class="swipe-stage">
-      {% for card in cards %}
-        <article class="card swipe-card {{ 'is-active' if loop.first else '' }}" data-swipe-card="{{ loop.index0 }}">
-          <span class="eyebrow">{{ card.subtitle }}</span>
-          <h2>{{ card.title }}</h2>
-          <p class="lead">{{ card.description }}</p>
-
-          <div class="tag-row">
-            {% for stack in card.stacks %}
-              <span class="tag-chip">{{ stack }}</span>
-            {% endfor %}
-          </div>
-
-          <div class="metric-grid">
-            <div>
-              <dt>{{ t('common.similarity') }}</dt>
-              <dd>{{ (card.similarity * 100)|int }}%</dd>
+    <section
+      class="swipe-stage"
+      data-swipe-stage
+      data-target="{{ target }}"
+      data-source-order-id="{{ selected_source_order.id if selected_source_order else '' }}"
+      data-match-title="{{ 'У вас мэтч' if lang == 'ru' else 'You matched' }}"
+      data-match-copy="{{ 'Взаимный выбор собран, можно сразу открыть чат.' if lang == 'ru' else 'Mutual choice completed. You can open the chat right away.' }}"
+      data-accepted-copy="{{ 'Карточка принята' if lang == 'ru' else 'Card accepted' }}"
+      data-rejected-copy="{{ 'Карточка отклонена' if lang == 'ru' else 'Card rejected' }}"
+      data-open-chat-label="{{ 'Открыть чат' if lang == 'ru' else 'Open chat' }}"
+      data-continue-label="{{ 'Продолжить свайп' if lang == 'ru' else 'Keep swiping' }}"
+      data-empty-title="{{ 'Карточки закончились' if lang == 'ru' else 'No more cards' }}"
+      data-empty-copy="{{ 'Смени фильтр или режим, чтобы получить новую подборку.' if lang == 'ru' else 'Change the filter or mode to get a fresh stack.' }}"
+    >
+      <div class="swipe-deck">
+        {% for card in cards %}
+          <article
+            class="card swipe-card {{ 'is-active' if loop.first else '' }} swipe-card--{{ card.entity_type }}"
+            data-swipe-card="{{ loop.index0 }}"
+            data-card-id="{{ card.id }}"
+            data-match-ready="{{ 'true' if card.match_ready else 'false' }}"
+            data-action-url="{{ card.action_url or '' }}"
+          >
+            <div class="swipe-card__stamps">
+              <span class="swipe-stamp swipe-stamp--accept">{{ "MATCH" if card.match_ready else "LIKE" }}</span>
+              <span class="swipe-stamp swipe-stamp--reject">{{ "PASS" }}</span>
             </div>
-            {% for key, value in card.meta.items() %}
-              <div>
-                <dt>{{ key }}</dt>
-                <dd>{{ value }}</dd>
+
+            <div class="swipe-card__header">
+              <span class="eyebrow">{{ card.subtitle }}</span>
+              <span class="badge badge--ghost">{{ "Исполнитель" if card.entity_type == 'executor' and lang == 'ru' else "Заказ" if lang == 'ru' else "Executor" if card.entity_type == 'executor' else "Order" }}</span>
+              {% if card.status_label %}
+                <span class="status-pill status-pill--{{ card.status_tone }}">{{ card.status_label }}</span>
+              {% endif %}
+            </div>
+
+            {% if card.entity_type == 'executor' %}
+              <div class="swipe-card__hero swipe-card__hero--executor">
+                <div class="swipe-card__avatar">{{ card.title[:1] }}</div>
+                <div>
+                  <h2>{{ card.title }}</h2>
+                  <p class="lead">{{ card.description }}</p>
+                </div>
               </div>
-            {% endfor %}
-          </div>
-        </article>
-      {% endfor %}
+
+              <div class="metric-grid">
+                <div>
+                  <dt>{{ "Рейтинг" if lang == 'ru' else "Rating" }}</dt>
+                  <dd>{{ card.meta.executor_rating }}</dd>
+                </div>
+                <div>
+                  <dt>{{ "Сделки" if lang == 'ru' else "Deals" }}</dt>
+                  <dd>{{ card.meta.completed_deals }}</dd>
+                </div>
+                <div>
+                  <dt>{{ "Роль" if lang == 'ru' else "Role" }}</dt>
+                  <dd>{{ card.meta.role }}</dd>
+                </div>
+                <div>
+                  <dt>{{ "Заказ" if lang == 'ru' else "Order" }}</dt>
+                  <dd>{{ card.meta.source_order_title or "-" }}</dd>
+                </div>
+              </div>
+            {% else %}
+              <div class="swipe-card__hero swipe-card__hero--order">
+                <div>
+                  <h2>{{ card.title }}</h2>
+                  <p class="lead">{{ card.description }}</p>
+                </div>
+                <div class="swipe-card__budget">
+                  <strong>{{ format_money(card.meta.budget_amount) }} RUB</strong>
+                  <small>{{ card.meta.budget_type }}</small>
+                </div>
+              </div>
+
+              <div class="metric-grid">
+                <div>
+                  <dt>{{ "Заказчик" if lang == 'ru' else "Client" }}</dt>
+                  <dd>{{ card.meta.client_name }}</dd>
+                </div>
+                <div>
+                  <dt>{{ t('common.similarity') }}</dt>
+                  <dd>{{ (card.similarity * 100)|int }}%</dd>
+                </div>
+                <div>
+                  <dt>{{ "К оплате клиенту" if lang == 'ru' else "Client total" }}</dt>
+                  <dd>{{ format_money(card.meta.client_total_amount) }} RUB</dd>
+                </div>
+                <div>
+                  <dt>Slug</dt>
+                  <dd>{{ card.meta.slug }}</dd>
+                </div>
+              </div>
+            {% endif %}
+
+            <div class="tag-row">
+              {% for stack in card.stacks %}
+                <span class="tag-chip">{{ stack }}</span>
+              {% endfor %}
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+
+      <div class="swipe-toast" data-swipe-toast></div>
 
       <div class="swipe-actions">
-        <button type="button" class="button button--secondary" data-swipe-action="prev">Назад</button>
-        <button type="button" class="button" data-swipe-action="next">Следующая карточка</button>
+        <button type="button" class="button button--secondary swipe-button swipe-button--reject" data-swipe-action="reject">
+          {{ "Отказ" if lang == 'ru' else "Reject" }}
+        </button>
+        <button type="button" class="button swipe-button swipe-button--accept" data-swipe-action="accept">
+          {{ "Принять" if lang == 'ru' else "Accept" }}
+        </button>
       </div>
     </section>
 
     <aside class="card swipe-rail swipe-rail--notes">
-      <span class="eyebrow">Почему выдача не полностью top-only</span>
+      <span class="eyebrow">{{ "Статусы выбора" if lang == 'ru' else "Decision states" }}</span>
       <ul class="plain-list">
-        <li>в обычном режиме карточки подмешиваются по разной степени релевантности</li>
-        <li>минимальный порог совпадения берётся из feature config</li>
-        <li>для premium later можно переключить стратегию на strict relevance</li>
+        <li>{{ "Ты выбрал: ты уже свайпнул вправо." if lang == 'ru' else "You liked: you already swiped right." }}</li>
+        <li>{{ "Выбрали тебя: встречный свайп уже есть." if lang == 'ru' else "Liked you: the opposite swipe already exists." }}</li>
+        <li>{{ "У вас мэтч: выбор взаимный, чат открыт." if lang == 'ru' else "You matched: the choice is mutual and the chat is open." }}</li>
       </ul>
     </aside>
   </section>
+
+  <div class="swipe-match-flash" data-swipe-match hidden>
+    <strong data-swipe-match-title></strong>
+    <span data-swipe-match-copy></span>
+    <a href="#" data-swipe-match-link>{{ "Открыть чат" if lang == 'ru' else "Open chat" }}</a>
+  </div>
+  <div class="swipe-confetti-layer" data-swipe-confetti></div>
 {% endblock %}
 
 {% block scripts %}

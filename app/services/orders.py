@@ -129,6 +129,45 @@ async def get_order_by_slug(session: AsyncSession, slug: str) -> Order | None:
     )
 
 
+async def list_client_orders(session: AsyncSession, *, user: User, locale: str) -> list[OrderCardResponse]:
+    orders = (
+        await session.scalars(
+            select(Order)
+            .options(
+                selectinload(Order.stacks),
+                selectinload(Order.client).selectinload(User.profile),
+                selectinload(Order.client)
+                .selectinload(User.subscriptions)
+                .selectinload(Subscription.tariff),
+            )
+            .where(Order.client_id == user.id)
+            .order_by(Order.created_at.desc())
+        )
+    ).all()
+    return [serialize_order(order, locale=locale) for order in orders]
+
+
+async def list_executor_orders(session: AsyncSession, *, user: User, locale: str) -> list[OrderCardResponse]:
+    from app.db.models import Application  # local import avoids circular dependency at import time
+
+    orders = (
+        await session.scalars(
+            select(Order)
+            .join(Application, Application.order_id == Order.id)
+            .options(
+                selectinload(Order.stacks),
+                selectinload(Order.client).selectinload(User.profile),
+                selectinload(Order.client)
+                .selectinload(User.subscriptions)
+                .selectinload(Subscription.tariff),
+            )
+            .where(Application.executor_id == user.id)
+            .order_by(Order.created_at.desc())
+        )
+    ).unique().all()
+    return [serialize_order(order, locale=locale) for order in orders]
+
+
 async def create_order(session: AsyncSession, user: User, payload: CreateOrderRequest) -> Order:
     settings = get_settings()
     if settings.features.require_tariff_after_first_completed and user.completed_deals >= 1 and not has_active_subscription(user):
@@ -195,6 +234,10 @@ def serialize_order(order: Order, *, locale: str, similarity: float | None = Non
         executor_amount=order.executor_amount,
         client_total_amount=order.client_total_amount,
         fee_percent=order.fee_percent,
+        escrow_status=order.escrow_status.value,
+        escrow_amount=order.escrow_amount,
+        client_completion_confirmed=order.client_completion_confirmed_at is not None,
+        executor_completion_confirmed=order.executor_completion_confirmed_at is not None,
         auto_filters=order.auto_filters or {},
         stacks=[tag.name_ru if locale == "ru" else tag.name_en for tag in order.stacks],
         client_name=order.client.display_name,

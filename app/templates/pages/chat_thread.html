@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="section-heading">
+    <div>
+      <span class="eyebrow">Chat</span>
+      <h1>{{ chat.order_title }}</h1>
+    </div>
+    <a class="button button--secondary" href="/orders/{{ chat.order_slug }}">{{ t('common.details') }}</a>
+  </section>
+
+  <section class="chat-layout">
+    <aside class="card chat-sidebar">
+      <span class="eyebrow">{{ t('nav.chats') }}</span>
+      <div class="stacked-actions">
+        <div class="chat-meta">
+          <strong>{{ t('label.client') }}</strong>
+          <small>{{ chat.client_name }}</small>
+        </div>
+        <div class="chat-meta">
+          <strong>{{ t('label.executor') }}</strong>
+          <small>{{ chat.executor_name }}</small>
+        </div>
+      </div>
+      <a class="button button--secondary" href="/chats">{{ t('nav.chats') }}</a>
+    </aside>
+
+    <div class="card chat-thread">
+      <div class="chat-messages">
+        {% for message in messages %}
+          <article class="chat-message {{ 'chat-message--own' if user and message.author_id == user.id else '' }}">
+            <strong>{{ message.author_name }}</strong>
+            <p>{{ message.body }}</p>
+          </article>
+        {% endfor %}
+      </div>
+
+      {% if message_error %}
+        <div class="alert">{{ message_error }}</div>
+      {% endif %}
+
+      <form method="post" action="/chats/{{ chat.id }}" class="filter-form">
+        <label>
+          <span>{{ t('order.message') }}</span>
+          <textarea name="body" rows="5" required placeholder="Write a message about scope, timing, or budget."></textarea>
+        </label>
+        <button class="button" type="submit">{{ t('order.send_application') }}</button>
+      </form>
+    </div>
+  </section>
+{% endblock %}

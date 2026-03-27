@@ -30,7 +30,7 @@ def _write_test_config(path: Path, db_path: Path) -> None:
                 "  fee_mode: deduct",
                 "  fee_percent: 0.01",
                 "  require_tariff_after_first_completed: true",
-                "  new_user_max_orders: 5",
+                "  new_user_max_orders: 20",
                 "  new_user_max_applications: 100",
                 "  new_user_max_matches: 3",
                 "  new_user_max_unmatched_applications_per_week: 50",

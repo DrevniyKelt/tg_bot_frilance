@@ -16,19 +16,19 @@
           <input type="text" name="q" value="{{ filters.q }}" placeholder="FastAPI, DevOps, Figma..." />
         </label>
         <label>
-          <span>Stack / synonym</span>
+          <span>{{ t('catalog.stack_synonym') }}</span>
           <input type="text" name="stack" value="{{ filters.stack }}" placeholder="js, python, k8s" />
         </label>
         <label>
-          <span>Budget from</span>
+          <span>{{ t('catalog.budget_from') }}</span>
           <input type="number" name="min_budget" value="{{ filters.min_budget }}" min="0" step="1000" />
         </label>
         <label>
-          <span>Budget to</span>
+          <span>{{ t('catalog.budget_to') }}</span>
           <input type="number" name="max_budget" value="{{ filters.max_budget }}" min="0" step="1000" />
         </label>
         <label>
-          <span>Status</span>
+          <span>{{ t('catalog.status') }}</span>
           <select name="status">
             <option value="">any</option>
             {% for option in ["published", "matched", "in_progress", "completed"] %}
@@ -41,7 +41,7 @@
       </form>
 
       <div class="sidebar__group">
-        <strong>Canonical stack after normalization</strong>
+        <strong>{{ t('catalog.normalized_stack') }}</strong>
         <div class="tag-row">
           {% for tag in orders.normalized_stack_filters %}
             <span class="tag-chip">{{ tag }}</span>
@@ -50,7 +50,7 @@
       </div>
 
       <div class="sidebar__group">
-        <strong>Catalog snapshot</strong>
+        <strong>{{ t('catalog.snapshot') }}</strong>
         {% for category in stack_catalog[:4] %}
           <div class="catalog-listing">
             <span>{{ category.name }}</span>
@@ -64,7 +64,7 @@
       <div class="section-heading section-heading--compact">
         <div>
           <span class="eyebrow">{{ orders.total }} jobs</span>
-          <h2>Результаты поиска</h2>
+          <h2>{{ t('section.search_results') }}</h2>
         </div>
         <a class="button button--secondary" href="/orders/new">{{ t('nav.new_order') }}</a>
       </div>
@@ -75,10 +75,18 @@
             {% include "components/order_card.html" %}
           {% endfor %}
         </div>
+        {% if catalog_ad %}
+          <article class="card promo-card">
+            <span class="eyebrow">{{ t('common.sponsored') }}</span>
+            <h3>{{ catalog_ad.title }}</h3>
+            <p class="muted">{{ catalog_ad.body }}</p>
+            <a class="button" href="/ads/click/{{ catalog_ad.code }}">{{ t('catalog.open_ad') }}</a>
+          </article>
+        {% endif %}
       {% else %}
         <div class="card empty-state">
           <h3>{{ t('catalog.empty') }}</h3>
-          <p class="muted">Попробуй расширить стек или убрать часть фильтров.</p>
+          <p class="muted">{{ t('catalog.try_broaden') }}</p>
         </div>
       {% endif %}
     </div>

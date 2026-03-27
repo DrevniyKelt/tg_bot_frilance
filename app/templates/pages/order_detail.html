@@ -26,6 +26,198 @@
           {% endfor %}
         </div>
       </div>
+
+      {% if can_apply %}
+        <div class="detail-block">
+          <h3>Откликнуться</h3>
+          {% if application_error %}
+            <div class="alert">{{ application_error }}</div>
+          {% endif %}
+          <form method="post" action="/orders/{{ order.slug }}/apply" class="filter-form">
+            <label>
+              <span>Сообщение</span>
+              <textarea name="cover_letter" rows="6" placeholder="Кратко опиши, как возьмешь заказ в работу."></textarea>
+            </label>
+            <div class="form-grid">
+              <label>
+                <span>Предложение по цене</span>
+                <input type="number" name="proposed_amount" min="1" step="100" placeholder="{{ order.budget_amount }}" />
+              </label>
+              <label>
+                <span>Срок в днях</span>
+                <input type="number" name="delivery_days" min="1" max="365" placeholder="14" />
+              </label>
+              <label class="full">
+                <span>Название файла / примера работы</span>
+                <input type="text" name="attachment_name" maxlength="200" placeholder="portfolio.pdf или dribbble-shot.png" />
+              </label>
+            </div>
+            <button class="button" type="submit">Отправить отклик</button>
+          </form>
+        </div>
+      {% endif %}
+
+      {% if user and user.id != order.client_id %}
+        <div class="detail-block">
+          <h3>Пожаловаться</h3>
+          {% if report_error %}
+            <div class="alert">{{ report_error }}</div>
+          {% endif %}
+          <form method="post" action="/orders/{{ order.slug }}/report" class="filter-form">
+            <label>
+              <span>Причина</span>
+              <textarea name="reason" rows="4" required placeholder="Опиши проблему: демпинг, требования вне сделки, нарушение правил."></textarea>
+            </label>
+            <input type="hidden" name="target_user_id" value="{{ order.client_id }}" />
+            <button class="button button--secondary" type="submit">Отправить жалобу</button>
+          </form>
+        </div>
+      {% endif %}
+
+      {% if is_order_owner %}
+        <div class="detail-block">
+          <div class="section-heading section-heading--compact">
+            <div>
+              <span class="eyebrow">Applications</span>
+              <h2>Отклики по заказу</h2>
+            </div>
+          </div>
+          {% if applications %}
+            <form method="post" action="/orders/{{ order.slug }}/select" class="stacked-actions">
+              {% for application in applications %}
+                <label class="card">
+                  <span class="order-card__header">
+                    <span>
+                      <strong>{{ application.executor_name }}</strong>
+                      <small>{{ application.executor_headline or 'Executor profile' }}</small>
+                    </span>
+                    <span class="status-pill">{{ application.status }}</span>
+                  </span>
+                  {% if application.status == 'pending' %}
+                    <input type="checkbox" name="application_ids" value="{{ application.id }}" />
+                  {% endif %}
+                  <span class="muted">{{ application.cover_letter or 'Быстрый отклик без сообщения.' }}</span>
+                  <span class="tag-row">
+                    <span class="tag-chip">rating: {{ application.executor_rating }}</span>
+                    {% if application.proposed_amount %}
+                      <span class="tag-chip">price: {{ format_money(application.proposed_amount) }}</span>
+                    {% endif %}
+                    {% if application.delivery_days %}
+                      <span class="tag-chip">{{ application.delivery_days }} days</span>
+                    {% endif %}
+                    {% if application.attachment_name %}
+                      <span class="tag-chip">{{ application.attachment_name }}</span>
+                    {% endif %}
+                  </span>
+                </label>
+              {% endfor %}
+              <button class="button" type="submit">Выбрать исполнителей</button>
+            </form>
+          {% else %}
+            <div class="card">
+              <p class="muted">Пока нет откликов.</p>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {% if related_chats %}
+        <div class="detail-block">
+          <div class="section-heading section-heading--compact">
+            <div>
+              <span class="eyebrow">Chat</span>
+              <h2>Активные диалоги</h2>
+            </div>
+          </div>
+          <div class="stacked-actions">
+            {% for chat in related_chats %}
+              <a class="button button--secondary" href="/chats/{{ chat.id }}">
+                Открыть чат с {{ chat.executor_name if user and user.id == chat.client_id else chat.client_name }}
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+      {% if order.status == 'completed' %}
+        <div class="detail-block">
+          <div class="section-heading section-heading--compact">
+            <div>
+              <span class="eyebrow">Reviews</span>
+              <h2>Отзывы по сделке</h2>
+            </div>
+          </div>
+
+          {% if review_error %}
+            <div class="alert">{{ review_error }}</div>
+          {% endif %}
+
+          {% if user and user.id == order.client_id %}
+            {% for application in applications if application.status == 'selected' %}
+              {% set existing = reviews|selectattr('reviewer_id', 'equalto', user.id)|selectattr('reviewee_id', 'equalto', application.executor_id)|list %}
+              {% if not existing %}
+                <form method="post" action="/orders/{{ order.slug }}/reviews" class="filter-form">
+                  <input type="hidden" name="reviewee_id" value="{{ application.executor_id }}" />
+                  <label>
+                    <span>Оценка для {{ application.executor_name }}</span>
+                    <select name="score">
+                      {% for option in [5, 4, 3, 2, 1] %}
+                        <option value="{{ option }}">{{ option }}</option>
+                      {% endfor %}
+                    </select>
+                  </label>
+                  <label>
+                    <span>Отзыв</span>
+                    <textarea name="text" rows="4" required placeholder="Как исполнитель показал себя в работе?"></textarea>
+                  </label>
+                  <button class="button" type="submit">Оставить отзыв исполнителю</button>
+                </form>
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+
+          {% if user and user.id != order.client_id and applications|selectattr('executor_id', 'equalto', user.id)|selectattr('status', 'equalto', 'selected')|list %}
+            {% set existing_client_review = reviews|selectattr('reviewer_id', 'equalto', user.id)|selectattr('reviewee_id', 'equalto', order.client_id)|list %}
+            {% if not existing_client_review %}
+              <form method="post" action="/orders/{{ order.slug }}/reviews" class="filter-form">
+                <input type="hidden" name="reviewee_id" value="{{ order.client_id }}" />
+                <label>
+                  <span>Оценка заказчику</span>
+                  <select name="score">
+                    {% for option in [5, 4, 3, 2, 1] %}
+                      <option value="{{ option }}">{{ option }}</option>
+                    {% endfor %}
+                  </select>
+                </label>
+                <label>
+                  <span>Отзыв</span>
+                  <textarea name="text" rows="4" required placeholder="Как заказчик вел коммуникацию и оплату?"></textarea>
+                </label>
+                <button class="button" type="submit">Оставить отзыв заказчику</button>
+              </form>
+            {% endif %}
+          {% endif %}
+
+          {% if reviews %}
+            <div class="stacked-actions">
+              {% for review in reviews %}
+                <article class="card">
+                  <span class="order-card__header">
+                    <span>
+                      <strong>{{ review.reviewer_name }} → {{ review.reviewee_name }}</strong>
+                      <small>{{ review.role }}</small>
+                    </span>
+                    <span class="status-pill">{{ review.score }}/5</span>
+                  </span>
+                  <p>{{ review.text }}</p>
+                </article>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="muted">Отзывы появятся после завершения сделки.</p>
+          {% endif %}
+        </div>
+      {% endif %}
     </article>
 
     <aside class="card detail-sidebar">
@@ -47,12 +239,66 @@
           <dt>Пост-модерация</dt>
           <dd>Активна</dd>
         </div>
+        <div>
+          <dt>Escrow</dt>
+          <dd>{{ order.escrow_status }}</dd>
+        </div>
+        <div>
+          <dt>Подтверждение заказчика</dt>
+          <dd>{{ 'Да' if order.client_completion_confirmed else 'Нет' }}</dd>
+        </div>
+        <div>
+          <dt>Подтверждение исполнителя</dt>
+          <dd>{{ 'Да' if order.executor_completion_confirmed else 'Нет' }}</dd>
+        </div>
       </dl>
 
       <div class="stacked-actions">
         <a class="button" href="/swipe?target=executors">Искать исполнителей</a>
         <a class="button button--secondary" href="/catalog">Вернуться в каталог</a>
       </div>
+
+      {% if is_order_owner %}
+        <div class="stacked-actions">
+          {% if order.escrow_status == 'none' and order.status == 'matched' %}
+            <form method="post" action="/orders/{{ order.slug }}/escrow/fund">
+              <button class="button" type="submit">Зарезервировать {{ format_money(order.client_total_amount) }} {{ order.currency }}</button>
+            </form>
+          {% elif order.escrow_status == 'held' and order.status == 'matched' %}
+            <form method="post" action="/orders/{{ order.slug }}/start">
+              <button class="button" type="submit">Перевести в работу</button>
+            </form>
+          {% elif order.escrow_status == 'held' and order.status == 'in_progress' %}
+            {% if not order.client_completion_confirmed %}
+              <form method="post" action="/orders/{{ order.slug }}/confirm">
+                <button class="button" type="submit">Подтвердить завершение</button>
+              </form>
+            {% endif %}
+            <form method="post" action="/orders/{{ order.slug }}/escrow/release">
+              <button class="button button--secondary" type="submit">Ручной payout</button>
+            </form>
+            <form method="post" action="/orders/{{ order.slug }}/escrow/refund">
+              <button class="button button--secondary" type="submit">Вернуть резерв заказчику</button>
+            </form>
+          {% else %}
+            <span class="badge badge--ghost">Escrow amount: {{ format_money(order.escrow_amount) }} {{ order.currency }}</span>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {% if user and not is_order_owner and applications|selectattr('executor_id', 'equalto', user.id)|selectattr('status', 'equalto', 'selected')|list %}
+        <div class="stacked-actions">
+          {% if order.status == 'matched' and order.escrow_status == 'held' %}
+            <form method="post" action="/orders/{{ order.slug }}/start">
+              <button class="button" type="submit">Начать работу</button>
+            </form>
+          {% elif order.status == 'in_progress' and not order.executor_completion_confirmed %}
+            <form method="post" action="/orders/{{ order.slug }}/confirm">
+              <button class="button" type="submit">Подтвердить завершение</button>
+            </form>
+          {% endif %}
+        </div>
+      {% endif %}
     </aside>
   </section>
 {% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="section-heading">
+    <div>
+      <span class="eyebrow">Dashboard</span>
+      <h1>{{ t('section.my_orders') }}</h1>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="tag-row">
+      <a class="button {{ '' if mode == 'client' else 'button--secondary' }}" href="/me/orders?mode=client">{{ t('common.client_mode') }}</a>
+      <a class="button {{ '' if mode == 'executor' else 'button--secondary' }}" href="/me/orders?mode=executor">{{ t('common.executor_mode') }}</a>
+    </div>
+
+    {% set orders = client_orders if mode == 'client' else executor_orders %}
+    {% if orders %}
+      <div class="card-grid card-grid--orders">
+        {% for order in orders %}
+          {% include "components/order_card.html" %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="card empty-state">
+        <h3>{{ t('section.no_orders_mode') }}</h3>
+        <p class="muted">{{ t('section.no_orders_mode_text') }}</p>
+      </div>
+    {% endif %}
+  </section>
+{% endblock %}

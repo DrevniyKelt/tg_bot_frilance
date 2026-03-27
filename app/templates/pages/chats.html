@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="section-heading">
+    <div>
+      <span class="eyebrow">Chats</span>
+      <h1>{{ t('section.order_dialogs') }}</h1>
+    </div>
+  </section>
+
+  <section class="section">
+    {% if chats %}
+      <div class="card-grid">
+        {% for chat in chats %}
+          <a class="card chat-card" href="/chats/{{ chat.id }}">
+            <span class="eyebrow">{{ t('common.order_chat') }}</span>
+            <h2>{{ chat.order_title }}</h2>
+            <p class="muted">
+              {{ chat.client_name }} ↔ {{ chat.executor_name }}
+            </p>
+            {% if chat.last_message %}
+              <p>{{ chat.last_message }}</p>
+            {% else %}
+              <p class="muted">{{ t('common.created_dialog') }}</p>
+            {% endif %}
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="card empty-state">
+        <h3>{{ t('section.no_chats') }}</h3>
+        <p class="muted">{{ t('section.no_chats_text') }}</p>
+      </div>
+    {% endif %}
+  </section>
+{% endblock %}
