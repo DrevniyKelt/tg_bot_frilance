@@ -136,14 +136,13 @@ function initSwipeStage() {
     card.dataset.swipeState = isAccept ? "accept" : "reject";
     setToast(isAccept ? labels.accepted : labels.rejected);
 
-    let payload = null;
-    try {
-      payload = await persistDecision(card, direction);
-    } catch (error) {
-      console.error(error);
-    }
+    window.requestAnimationFrame(() => {
+      activeIndex += 1;
+      updateDeck();
+    });
 
-    window.setTimeout(() => {
+    try {
+      const payload = await persistDecision(card, direction);
       if (payload?.matched && payload.chat_url) {
         launchConfetti();
         openMatchModal(payload);
@@ -151,9 +150,9 @@ function initSwipeStage() {
       } else if (payload?.status_label) {
         setToast(payload.status_label);
       }
-      activeIndex += 1;
-      updateDeck();
-    }, 220);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const releaseDrag = () => {

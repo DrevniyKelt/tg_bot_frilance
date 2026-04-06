@@ -18,68 +18,23 @@
         </ul>
       </div>
 
-<<<<<<< HEAD
-    <aside class="hero-panel card">
-      <strong>{{ t('section.roadmap_half') }}</strong>
-      <ul class="plain-list">
-        <li>{{ t('hero.kicker') }}</li>
-        <li>{{ t('profile.subtitle') }}</li>
-        <li>{{ t('catalog.subtitle') }}</li>
-        <li>Demo login, SEO sitemap, API docs and tests</li>
-      </ul>
-      <a class="button button--secondary" href="/docs">{{ t('common.open_api') }}</a>
-      {% if sidebar_ad %}
-        <article class="promo-card">
-          <span class="eyebrow">{{ t('common.sponsored') }}</span>
-          <h3>{{ sidebar_ad.title }}</h3>
-          <p class="muted">{{ sidebar_ad.body }}</p>
-          <a class="button" href="/ads/click/{{ sidebar_ad.code }}">{{ t('common.open') }}</a>
-        </article>
-      {% endif %}
-    </aside>
-  </section>
-
-  <section class="section">
-    <div class="section-heading">
-      <div>
-        <span class="eyebrow">{{ t('section.featured_orders') }}</span>
-        <h2>{{ t('section.first_beta_orders') }}</h2>
-      </div>
-      <a class="button button--secondary" href="/catalog">{{ t('common.open') }}</a>
-    </div>
-    <div class="card-grid card-grid--orders">
-      {% for order in orders %}
-        {% include "components/order_card.html" %}
-      {% endfor %}
-    </div>
-  </section>
-
-  <section class="section split">
-    <div class="card">
-      <span class="eyebrow">{{ t('section.featured_stack') }}</span>
-      <h2>{{ t('section.stack_entity') }}</h2>
-      <p class="muted">{{ t('section.stack_entity_text') }}</p>
-      <div class="stack-columns">
-        {% for category in stack_catalog %}
-          <section>
-            <h3>{{ category.name }}</h3>
-            <div class="tag-row">
-              {% for tag in category.tags[:4] %}
-                <span class="tag-chip">{{ tag.name }}</span>
-              {% endfor %}
-            </div>
-          </section>
-=======
       <aside class="hero-panel hero-panel--roadmap card">
-        <span class="eyebrow">RoadMap MVP</span>
-        <h2>Что уже собрано в первой половине RoadMap</h2>
+        <strong>{{ t('section.roadmap_half') }}</strong>
         <ul class="plain-list plain-list--checks">
-          <li>Сайт и Mini App контейнер на одном FastAPI/Jinja2 приложении</li>
-          <li>Профиль, роли, стек, тарифы и доп. пакеты</li>
-          <li>Заказы, фильтры, поиск по стеку и swipe-режим</li>
-          <li>Demo login, SEO sitemap, API docs и тесты</li>
+          <li>{{ t('hero.kicker') }}</li>
+          <li>{{ t('profile.subtitle') }}</li>
+          <li>{{ t('catalog.subtitle') }}</li>
+          <li>Demo login, SEO sitemap, API docs and tests</li>
         </ul>
-        <a class="button button--secondary" href="/docs">Открыть OpenAPI</a>
+        <a class="button button--secondary" href="/docs">{{ t('common.open_api') }}</a>
+        {% if sidebar_ad %}
+          <article class="promo-card">
+            <span class="eyebrow">{{ t('common.sponsored') }}</span>
+            <h3>{{ sidebar_ad.title }}</h3>
+            <p class="muted">{{ sidebar_ad.body }}</p>
+            <a class="button" href="/ads/click/{{ sidebar_ad.code }}">{{ t('common.open') }}</a>
+          </article>
+        {% endif %}
       </aside>
     </section>
 
@@ -87,46 +42,22 @@
       <div class="section-heading">
         <div>
           <span class="eyebrow">{{ t('section.featured_orders') }}</span>
-          <h2>Первые заказы для закрытой беты</h2>
+          <h2>{{ t('section.first_beta_orders') }}</h2>
         </div>
         <a class="button button--secondary" href="/catalog">{{ t('common.open') }}</a>
       </div>
       <div class="card-grid card-grid--orders">
         {% for order in orders %}
           {% include "components/order_card.html" %}
->>>>>>> e6e82a4e89c6483903aa1ddb57dc85448746ce8e
         {% endfor %}
       </div>
     </section>
 
-<<<<<<< HEAD
-    <div class="card">
-      <span class="eyebrow">{{ t('section.tariffs') }}</span>
-      <h2>{{ t('section.tariffs_limits') }}</h2>
-      <div class="pricing-stack">
-        {% for tariff in tariffs %}
-          <article class="pricing-card">
-            <strong>{{ tariff.name_ru if lang == 'ru' else tariff.name_en }}</strong>
-            <span class="pricing-card__price">{{ format_money(tariff.price_rub) }} RUB</span>
-            <ul class="plain-list">
-              <li>{{ tariff.create_orders_per_day }} {{ t('tariffs.posts_per_day') }}</li>
-              <li>{{ tariff.bids_per_day }} {{ t('tariffs.bids_per_day') }}</li>
-              <li>{{ "Без рекламы" if lang == 'ru' and tariff.ads_disabled else "Реклама снижена" if lang == 'ru' else "Ads off" if tariff.ads_disabled else "Ads reduced" }}</li>
-            </ul>
-          </article>
-        {% endfor %}
-        <div class="addon-strip">
-          {% for addon in addons %}
-            <span class="addon-pill">{{ addon.name_ru if lang == 'ru' else addon.name_en }} · {{ format_money(addon.price_rub) }} RUB</span>
-=======
     <section class="section split split--home">
       <div class="card card--stack">
         <span class="eyebrow">{{ t('section.featured_stack') }}</span>
-        <h2>Стек как отдельная сущность</h2>
-        <p class="muted">
-          Теги хранятся отдельно от текста заказа, а значит синонимы, фильтрация и ранжирование работают не на уровне
-          “угадай по описанию”, а на реальной структуре.
-        </p>
+        <h2>{{ t('section.stack_entity') }}</h2>
+        <p class="muted">{{ t('section.stack_entity_text') }}</p>
         <div class="stack-columns">
           {% for category in stack_catalog %}
             <section>
@@ -137,29 +68,28 @@
                 {% endfor %}
               </div>
             </section>
->>>>>>> e6e82a4e89c6483903aa1ddb57dc85448746ce8e
           {% endfor %}
         </div>
       </div>
 
       <div class="card card--tariffs">
         <span class="eyebrow">{{ t('section.tariffs') }}</span>
-        <h2>Тарифы и лимиты</h2>
+        <h2>{{ t('section.tariffs_limits') }}</h2>
         <div class="pricing-stack">
           {% for tariff in tariffs %}
             <article class="pricing-card">
-              <strong>{{ tariff.name_ru }}</strong>
+              <strong>{{ tariff.name_ru if lang == 'ru' else tariff.name_en }}</strong>
               <span class="pricing-card__price">{{ format_money(tariff.price_rub) }} RUB</span>
               <ul class="plain-list">
-                <li>{{ tariff.create_orders_per_day }} публикаций в день</li>
-                <li>{{ tariff.bids_per_day }} откликов в день</li>
-                <li>{{ "Без рекламы" if tariff.ads_disabled else "Реклама снижена" }}</li>
+                <li>{{ tariff.create_orders_per_day }} {{ t('tariffs.posts_per_day') }}</li>
+                <li>{{ tariff.bids_per_day }} {{ t('tariffs.bids_per_day') }}</li>
+                <li>{{ "Без рекламы" if lang == 'ru' and tariff.ads_disabled else "Реклама снижена" if lang == 'ru' else "Ads off" if tariff.ads_disabled else "Ads reduced" }}</li>
               </ul>
             </article>
           {% endfor %}
           <div class="addon-strip">
             {% for addon in addons %}
-              <span class="addon-pill">{{ addon.name_ru }} · {{ format_money(addon.price_rub) }} RUB</span>
+              <span class="addon-pill">{{ addon.name_ru if lang == 'ru' else addon.name_en }} · {{ format_money(addon.price_rub) }} RUB</span>
             {% endfor %}
           </div>
         </div>

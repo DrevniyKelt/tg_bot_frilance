@@ -210,6 +210,16 @@ class User(Base):
         cascade="all, delete-orphan",
         lazy="selectin",
     )
+    forum_topics: Mapped[list["ForumTopic"]] = relationship(
+        back_populates="author",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+    forum_posts: Mapped[list["ForumPost"]] = relationship(
+        back_populates="author",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
     wallet_transactions: Mapped[list["WalletTransaction"]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",
@@ -515,6 +525,37 @@ class ChatMessage(Base):
 
     chat: Mapped[Chat] = relationship(back_populates="messages", lazy="selectin")
     author: Mapped[User] = relationship(back_populates="messages", lazy="selectin")
+
+
+class ForumTopic(Base):
+    __tablename__ = "forum_topics"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    author_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    title: Mapped[str] = mapped_column(String(180))
+    body: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+
+    author: Mapped[User] = relationship(back_populates="forum_topics", lazy="selectin")
+    posts: Mapped[list["ForumPost"]] = relationship(
+        back_populates="topic",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+
+
+class ForumPost(Base):
+    __tablename__ = "forum_posts"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    topic_id: Mapped[int] = mapped_column(ForeignKey("forum_topics.id", ondelete="CASCADE"), index=True)
+    author_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    body: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+    topic: Mapped[ForumTopic] = relationship(back_populates="posts", lazy="selectin")
+    author: Mapped[User] = relationship(back_populates="forum_posts", lazy="selectin")
 
 
 class WalletTransaction(Base):

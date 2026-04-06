@@ -4,11 +4,11 @@ from decimal import Decimal
 
 
 def test_home_page_renders(client):
-    response = client.get("/")
+    response = client.get("/", follow_redirects=True)
 
     assert response.status_code == 200
     assert "SkillLane" in response.text
-    assert "RoadMap" in response.text
+    assert "Swipe" in response.text
 
 
 def test_stack_synonym_search_normalizes_filters(client):
@@ -377,7 +377,7 @@ def test_swipe_order_cards_show_inverse_state_for_executor(client):
 
 
 def test_test_mode_toggle_disables_and_enables_demo_login(client):
-    enabled_home = client.get("/")
+    enabled_home = client.get("/", follow_redirects=True)
     assert enabled_home.status_code == 200
     assert "/logout" in enabled_home.text
 
@@ -389,3 +389,34 @@ def test_test_mode_toggle_disables_and_enables_demo_login(client):
     enable = client.get("/test-mode/toggle", follow_redirects=True)
     assert enable.status_code == 200
     assert "/logout" in enable.text
+
+
+def test_guest_swipe_and_community_show_registration_gate(client):
+    client.get("/test-mode/toggle", follow_redirects=True)
+
+    swipe = client.get("/swipe")
+    assert swipe.status_code == 200
+    assert "Зарегистрируйтесь для начала использования" in swipe.text
+
+    community = client.get("/community?view=chats")
+    assert community.status_code == 200
+    assert "Зарегистрируйтесь для начала использования" in community.text
+
+
+def test_community_forums_page_renders_and_creates_topic(client):
+    client.get("/auth/demo/2")
+
+    community = client.get("/community?view=forums")
+    assert community.status_code == 200
+    assert "Чаты и форумы" in community.text
+
+    create_topic = client.post(
+        "/community/forums/topics",
+        data={
+            "title": "Как оформлять портфолио в карточке",
+            "body": "Хочу собрать практические советы по тому, какие кейсы лучше показывать прямо в карточке исполнителя.",
+        },
+        follow_redirects=True,
+    )
+    assert create_topic.status_code == 200
+    assert "Как оформлять портфолио в карточке" in create_topic.text

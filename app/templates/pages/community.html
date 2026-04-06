@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="section-heading">
+    <div>
+      <span class="eyebrow">{{ "Community" if lang == 'en' else "Комьюнити" }}</span>
+      <h1>{{ "Chats and forums" if lang == 'en' else "Чаты и форумы" }}</h1>
+    </div>
+  </section>
+
+  {% if guest_required %}
+    <section class="section">
+      <div class="card empty-state auth-gate">
+        <span class="eyebrow">{{ "Account required" if lang == 'en' else "Нужен аккаунт" }}</span>
+        <h2>{{ "Register to start using SkillLane" if lang == 'en' else "Зарегистрируйтесь для начала использования" }}</h2>
+        <p class="muted">
+          {{ "Chats with clients and forum participation become available right after sign-in." if lang == 'en' else "После входа станут доступны чаты с заказчиками и участие в форумах." }}
+        </p>
+        <a class="button" href="/auth/demo/1">{{ t('cta.demo_login') }}</a>
+      </div>
+    </section>
+  {% else %}
+    <section class="community-shell">
+      <div class="community-tabs" data-community-tabs>
+        <a
+          href="/community?view=chats"
+          class="community-tab {{ 'is-active' if view == 'chats' else '' }}"
+          data-community-tab
+          data-community-direction="left"
+        >
+          {{ "Chats" if lang == 'en' else "Чаты" }}
+        </a>
+        <a
+          href="/community?view=forums{% if active_topic %}&topic_id={{ active_topic.id }}{% endif %}"
+          class="community-tab {{ 'is-active' if view == 'forums' else '' }}"
+          data-community-tab
+          data-community-direction="right"
+        >
+          {{ "Forums" if lang == 'en' else "Форумы" }}
+        </a>
+      </div>
+
+      <div class="community-flipbook">
+        <section class="community-panel community-panel--{{ view }}" data-community-panel>
+          {% if view == 'chats' %}
+            <div class="community-layout">
+              <aside class="card community-sidebar">
+                <span class="eyebrow">{{ "Order dialogs" if lang == 'en' else "Диалоги по заказам" }}</span>
+                <p class="muted">
+                  {{ "Direct communication with clients and executors after a match or selection." if lang == 'en' else "Прямое общение с заказчиками и исполнителями после выбора или мэтча." }}
+                </p>
+              </aside>
+
+              <div class="community-main">
+                {% if chats %}
+                  <div class="card-grid">
+                    {% for chat in chats %}
+                      <a class="card chat-card" href="/chats/{{ chat.id }}">
+                        <span class="eyebrow">{{ "Order chat" if lang == 'en' else "Чат по заказу" }}</span>
+                        <h2>{{ chat.order_title }}</h2>
+                        <p class="muted">{{ chat.client_name }} ↔ {{ chat.executor_name }}</p>
+                        {% if chat.last_message %}
+                          <p>{{ chat.last_message }}</p>
+                        {% else %}
+                          <p class="muted">{{ "The dialog is ready to start." if lang == 'en' else "Диалог создан и готов к старту." }}</p>
+                        {% endif %}
+                      </a>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <div class="card empty-state">
+                    <h3>{{ "No chats yet" if lang == 'en' else "Чатов пока нет" }}</h3>
+                    <p class="muted">{{ "Choose an executor or get a mutual swipe to open the first dialog." if lang == 'en' else "Выбери исполнителя или получи взаимный свайп, чтобы открыть первый диалог." }}</p>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          {% else %}
+            <div class="community-layout">
+              <aside class="card forum-sidebar">
+                <span class="eyebrow">{{ "Topics" if lang == 'en' else "Темы" }}</span>
+                <div class="forum-topic-list">
+                  {% for topic in forum_topics %}
+                    <a
+                      href="/community?view=forums&topic_id={{ topic.id }}"
+                      class="forum-topic-chip {{ 'is-active' if active_topic and active_topic.id == topic.id else '' }}"
+                    >
+                      <strong>{{ topic.title }}</strong>
+                      <small>{{ topic.author_name }} · {{ topic.posts_count }}</small>
+                    </a>
+                  {% endfor %}
+                </div>
+              </aside>
+
+              <div class="community-main community-main--forum">
+                {% if topic_error %}
+                  <div class="alert">{{ topic_error }}</div>
+                {% endif %}
+                {% if post_error %}
+                  <div class="alert">{{ post_error }}</div>
+                {% endif %}
+
+                <div class="card forum-create">
+                  <span class="eyebrow">{{ "Start a thread" if lang == 'en' else "Создать тему" }}</span>
+                  <form method="post" action="/community/forums/topics" class="filter-form">
+                    <label>
+                      <span>{{ "Title" if lang == 'en' else "Заголовок" }}</span>
+                      <input type="text" name="title" required minlength="6" />
+                    </label>
+                    <label>
+                      <span>{{ "Opening message" if lang == 'en' else "Первое сообщение" }}</span>
+                      <textarea name="body" rows="4" required minlength="12"></textarea>
+                    </label>
+                    <button class="button" type="submit">{{ "Publish topic" if lang == 'en' else "Опубликовать тему" }}</button>
+                  </form>
+                </div>
+
+                {% if active_topic %}
+                  <div class="card forum-thread">
+                    <span class="eyebrow">{{ "Forum thread" if lang == 'en' else "Форумная тема" }}</span>
+                    <h2>{{ active_topic.title }}</h2>
+                    <p class="muted">{{ active_topic.author_name }}</p>
+                    <p>{{ active_topic.body }}</p>
+
+                    <div class="forum-posts">
+                      {% for post in active_topic_posts %}
+                        <article class="forum-post">
+                          <strong>{{ post.author_name }}</strong>
+                          <p>{{ post.body }}</p>
+                        </article>
+                      {% endfor %}
+                    </div>
+
+                    <form method="post" action="/community/forums/{{ active_topic.id }}/posts" class="filter-form">
+                      <label>
+                        <span>{{ "Reply" if lang == 'en' else "Ответ" }}</span>
+                        <textarea name="body" rows="4" required></textarea>
+                      </label>
+                      <button class="button" type="submit">{{ "Send reply" if lang == 'en' else "Отправить ответ" }}</button>
+                    </form>
+                  </div>
+                {% else %}
+                  <div class="card empty-state">
+                    <h3>{{ "No forum topics yet" if lang == 'en' else "Тем форума пока нет" }}</h3>
+                    <p class="muted">{{ "Create the first thread and start the discussion." if lang == 'en' else "Создай первую тему и начни обсуждение." }}</p>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
+        </section>
+      </div>
+    </section>
+  {% endif %}
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', path='/js/community.js') }}" defer></script>
+{% endblock %}

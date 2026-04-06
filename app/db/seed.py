@@ -14,6 +14,8 @@ from app.db.models import (
     AdCampaign,
     BudgetType,
     Currency,
+    ForumPost,
+    ForumTopic,
     Order,
     RoleMode,
     SwipeActorSide,
@@ -76,6 +78,7 @@ async def seed_demo_data() -> None:
         await _seed_tariffs(session)
         await _seed_users_and_orders(session)
         await _seed_ads(session)
+        await _seed_forums(session)
         await session.commit()
 
 
@@ -530,3 +533,54 @@ async def _seed_ads(session: AsyncSession) -> None:
             )
         )
     session.add_all(payload)
+
+
+async def _seed_forums(session: AsyncSession) -> None:
+    users_by_name = {
+        user.display_name: user
+        for user in (await session.scalars(select(User))).all()
+    }
+    existing_titles = set((await session.scalars(select(ForumTopic.title))).all())
+    topics_payload = [
+        (
+            "Как лучше оформить первый отклик в закрытой бете",
+            "Собираю best practices для первых сообщений заказчику: что писать в cover letter, как не перегружать и как быстро показать релевантность.",
+            "Mihai Demo",
+            [
+                ("Lena Morozova", "Я обычно начинаю с двух фактов: похожий кейс и что именно закрою в первую неделю."),
+                ("Maksim Kiselev", "Хорошо работает короткий план: scope, срок, риски, следующий шаг."),
+            ],
+        ),
+        (
+            "Какие карточки свайпа выглядят наиболее убедительно",
+            "Хочу собрать список сигналов, которые реально повышают шанс мэтча: рейтинг, примеры работ, стек, цена или тон описания.",
+            "Daria Volkova",
+            [
+                ("Ivan Petrov", "Для меня решает сочетание стека и ясного scope, а не просто громкий headline."),
+                ("Mihai Demo", "Добавил бы еще прозрачный бюджет и понятный expected outcome в 2-3 строки."),
+            ],
+        ),
+        (
+            "Минимальный набор метрик для админки модерации",
+            "Какие показатели стоит показать в первой версии: жалобы, время реакции, скрытые заказы, спорные сделки?",
+            "Sergey Smirnov",
+            [
+                ("Maksim Kiselev", "Я бы начал с очереди тикетов, SLA и причины закрытия."),
+            ],
+        ),
+    ]
+
+    for title, body, author_name, replies in topics_payload:
+        if title in existing_titles:
+            continue
+        author = users_by_name.get(author_name)
+        if author is None:
+            continue
+        topic = ForumTopic(author_id=author.id, title=title, body=body)
+        session.add(topic)
+        await session.flush()
+        for reply_author_name, reply_body in replies:
+            reply_author = users_by_name.get(reply_author_name)
+            if reply_author is None:
+                continue
+            session.add(ForumPost(topic_id=topic.id, author_id=reply_author.id, body=reply_body))

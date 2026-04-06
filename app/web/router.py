@@ -27,6 +27,7 @@ from app.services.applications import create_application, list_order_application
 from app.services.chats import assert_chat_member, create_message, get_chat_by_id, list_user_chats, serialize_chat, serialize_message
 from app.services.catalog import get_stack_catalog, list_addon_packs, list_tariffs
 from app.services.deals import confirm_order_completion, start_order_work
+from app.services.forums import create_forum_post, create_forum_topic, get_forum_topic_by_id, list_forum_topics, serialize_forum_post, serialize_forum_topic
 from app.services.moderation import ban_user, create_moderation_ticket, ensure_admin, hide_order, list_moderation_tickets, resolve_ticket, serialize_ticket
 from app.services.orders import (
     create_order,
@@ -98,32 +99,12 @@ def _exception_message(exc: Exception) -> str:
 
 
 def _auth_redirect() -> RedirectResponse:
-    return RedirectResponse(url="/", status_code=303)
+    return RedirectResponse(url="/swipe", status_code=303)
 
 
 @router.get("/")
-async def home(request: Request, session: AsyncSession = Depends(get_db_session)) -> Response:
-    user = await resolve_current_user(session, request)
-    locale = detect_locale(request, get_settings())
-    orders = await list_orders(session, locale=locale)
-    stack_catalog = await get_stack_catalog(session, locale)
-    tariffs = await list_tariffs(session)
-    addons = await list_addon_packs(session)
-    sidebar_ad = await get_active_ad_for_placement(session, "home_sidebar")
-    if sidebar_ad:
-        sidebar_ad = await record_ad_impression(session, sidebar_ad.code)
-    context = _build_context(
-        request,
-        title="SkillLane",
-        active_route="home",
-        user=user,
-        orders=orders.items[:3],
-        stack_catalog=stack_catalog[:4],
-        tariffs=tariffs,
-        addons=addons,
-        sidebar_ad=serialize_ad_campaign(sidebar_ad) if sidebar_ad else None,
-    )
-    return _template_response(request, "pages/home.html", context)
+async def home() -> RedirectResponse:
+    return RedirectResponse(url="/swipe", status_code=303)
 
 
 @router.get("/catalog")
@@ -154,7 +135,7 @@ async def catalog(
     context = _build_context(
         request,
         title="Catalog",
-        active_route="catalog",
+        active_route="orders",
         user=user,
         orders=orders,
         stack_catalog=stack_catalog,
@@ -282,7 +263,7 @@ async def order_detail(
     context = _build_context(
         request,
         title=order.title,
-        active_route="catalog",
+        active_route="orders",
         user=user,
         order=serialize_order(order, locale=locale),
         applications=[serialize_application(application) for application in applications],
@@ -338,7 +319,7 @@ async def apply_to_order_from_form(
         context = _build_context(
             request,
             title=order.title,
-            active_route="catalog",
+            active_route="orders",
             user=user,
             order=serialize_order(order, locale=locale),
             applications=[serialize_application(application) for application in applications],
@@ -387,7 +368,7 @@ async def create_review_from_form(
         context = _build_context(
             request,
             title=order.title,
-            active_route="catalog",
+            active_route="orders",
             user=user,
             order=serialize_order(order, locale=locale),
             applications=[serialize_application(application) for application in applications],
@@ -439,7 +420,7 @@ async def create_order_report_from_form(
         context = _build_context(
             request,
             title=order.title,
-            active_route="catalog",
+            active_route="orders",
             user=user,
             order=serialize_order(order, locale=locale),
             applications=[serialize_application(application) for application in applications],
@@ -723,24 +704,27 @@ async def swipe_page(
     session: AsyncSession = Depends(get_db_session),
 ) -> Response:
     user = await resolve_current_user(session, request)
-    if user is None:
-        return _auth_redirect()
-    if target is None:
-        target = "executors" if user.primary_role in {RoleMode.CLIENT, RoleMode.BOTH} else "orders"
     locale = detect_locale(request, get_settings())
-    cards = await build_swipe_cards(
-        session,
-        user,
-        target=target,
-        stack=stack,
-        locale=locale,
-        source_order_id=source_order_id,
-    )
+    guest_required = user is None
+    if target is None:
+        target = "executors" if user and user.primary_role in {RoleMode.CLIENT, RoleMode.BOTH} else "orders"
+    cards = []
     stack_catalog = await get_stack_catalog(session, locale)
-    source_orders = await list_swipe_source_orders(session, user=user)
-    selected_source_order = next((item for item in source_orders if item.id == source_order_id), None)
-    if selected_source_order is None and source_orders:
-        selected_source_order = source_orders[0]
+    source_orders = []
+    selected_source_order = None
+    if user is not None:
+        cards = await build_swipe_cards(
+            session,
+            user,
+            target=target,
+            stack=stack,
+            locale=locale,
+            source_order_id=source_order_id,
+        )
+        source_orders = await list_swipe_source_orders(session, user=user)
+        selected_source_order = next((item for item in source_orders if item.id == source_order_id), None)
+        if selected_source_order is None and source_orders:
+            selected_source_order = source_orders[0]
     context = _build_context(
         request,
         title="Swipe",
@@ -752,6 +736,7 @@ async def swipe_page(
         stack_filter=stack or "",
         source_orders=source_orders,
         selected_source_order=selected_source_order,
+        guest_required=guest_required,
     )
     return _template_response(request, "pages/swipe.html", context)
 
@@ -880,19 +865,109 @@ async def ban_user_from_form(
 
 
 @router.get("/chats")
-async def chats_page(request: Request, session: AsyncSession = Depends(get_db_session)) -> Response:
+async def chats_page() -> RedirectResponse:
+    return RedirectResponse(url="/community?view=chats", status_code=303)
+
+
+@router.get("/community")
+async def community_page(
+    request: Request,
+    view: str = Query(default="chats", pattern="^(chats|forums)$"),
+    topic_id: int | None = None,
+    session: AsyncSession = Depends(get_db_session),
+) -> Response:
+    user = await resolve_current_user(session, request)
+    chats = await list_user_chats(session, user=user) if user else []
+    forum_topics = await list_forum_topics(session)
+    active_topic = None
+    if forum_topics:
+        active_topic = next((topic for topic in forum_topics if topic.id == topic_id), None) or forum_topics[0]
+    context = _build_context(
+        request,
+        title="Chats and Forums",
+        active_route="community",
+        user=user,
+        guest_required=user is None,
+        view=view,
+        chats=[serialize_chat(chat) for chat in chats],
+        forum_topics=[serialize_forum_topic(topic) for topic in forum_topics],
+        active_topic=serialize_forum_topic(active_topic) if active_topic else None,
+        active_topic_posts=[serialize_forum_post(post) for post in active_topic.posts] if active_topic else [],
+        topic_error=None,
+        post_error=None,
+    )
+    return _template_response(request, "pages/community.html", context)
+
+
+@router.post("/community/forums/topics")
+async def create_forum_topic_from_form(
+    request: Request,
+    title: str = Form(...),
+    body: str = Form(...),
+    session: AsyncSession = Depends(get_db_session),
+) -> Response:
     user = await resolve_current_user(session, request)
     if user is None:
         return _auth_redirect()
-    chats = await list_user_chats(session, user=user)
-    context = _build_context(
-        request,
-        title="Chats",
-        active_route="profile",
-        user=user,
-        chats=[serialize_chat(chat) for chat in chats],
-    )
-    return _template_response(request, "pages/chats.html", context)
+    try:
+        topic = await create_forum_topic(session, author=user, title=title, body=body)
+        return RedirectResponse(url=f"/community?view=forums&topic_id={topic.id}", status_code=303)
+    except Exception as exc:  # noqa: BLE001
+        chats = await list_user_chats(session, user=user)
+        forum_topics = await list_forum_topics(session)
+        active_topic = forum_topics[0] if forum_topics else None
+        context = _build_context(
+            request,
+            title="Chats and Forums",
+            active_route="community",
+            user=user,
+            guest_required=False,
+            view="forums",
+            chats=[serialize_chat(chat) for chat in chats],
+            forum_topics=[serialize_forum_topic(topic) for topic in forum_topics],
+            active_topic=serialize_forum_topic(active_topic) if active_topic else None,
+            active_topic_posts=[serialize_forum_post(post) for post in active_topic.posts] if active_topic else [],
+            topic_error=_exception_message(exc),
+            post_error=None,
+        )
+        return _template_response(request, "pages/community.html", context)
+
+
+@router.post("/community/forums/{topic_id}/posts")
+async def create_forum_post_from_form(
+    topic_id: int,
+    request: Request,
+    body: str = Form(...),
+    session: AsyncSession = Depends(get_db_session),
+) -> Response:
+    user = await resolve_current_user(session, request)
+    if user is None:
+        return _auth_redirect()
+    topic = await get_forum_topic_by_id(session, topic_id)
+    if topic is None:
+        return RedirectResponse(url="/community?view=forums", status_code=303)
+    try:
+        await create_forum_post(session, topic=topic, author=user, body=body)
+        return RedirectResponse(url=f"/community?view=forums&topic_id={topic_id}", status_code=303)
+    except Exception as exc:  # noqa: BLE001
+        chats = await list_user_chats(session, user=user)
+        forum_topics = await list_forum_topics(session)
+        active_topic = await get_forum_topic_by_id(session, topic_id)
+        context = _build_context(
+            request,
+            title="Chats and Forums",
+            active_route="community",
+            user=user,
+            guest_required=False,
+            view="forums",
+            chats=[serialize_chat(chat) for chat in chats],
+            forum_topics=[serialize_forum_topic(item) for item in forum_topics],
+            active_topic=serialize_forum_topic(active_topic) if active_topic else None,
+            active_topic_posts=[serialize_forum_post(post) for post in active_topic.posts] if active_topic else [],
+            topic_error=None,
+            post_error=_exception_message(exc),
+        )
+        return _template_response(request, "pages/community.html", context)
 
 
 @router.get("/chats/{chat_id}")
@@ -911,7 +986,7 @@ async def chat_thread_page(
     context = _build_context(
         request,
         title=f"Chat {chat.id}",
-        active_route="profile",
+        active_route="community",
         user=user,
         chat=serialize_chat(chat),
         messages=[serialize_message(message) for message in sorted(chat.messages, key=lambda item: item.created_at)],
@@ -972,14 +1047,14 @@ async def toggle_test_mode(request: Request) -> RedirectResponse:
         request.session["user_id"] = request.session.get("user_id") or settings.demo.default_user_id
     else:
         request.session.pop("user_id", None)
-    target = request.headers.get("referer") or "/"
+    target = request.headers.get("referer") or "/swipe"
     return RedirectResponse(url=target, status_code=303)
 
 
 @router.get("/logout")
 async def web_logout(request: Request) -> RedirectResponse:
     request.session.clear()
-    return RedirectResponse(url="/", status_code=303)
+    return RedirectResponse(url="/swipe", status_code=303)
 
 
 @router.get("/health")

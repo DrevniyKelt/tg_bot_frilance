@@ -19,8 +19,7 @@
   <body>
     <div class="page-shell">
       <header class="topbar">
-<<<<<<< HEAD
-        <a class="brand-mark" href="/">
+        <a class="brand-mark" href="/swipe">
           <span class="brand-mark__logo">SL</span>
           <span>
             <strong>{{ settings.app.name }}</strong>
@@ -29,10 +28,10 @@
         </a>
 
         <nav class="main-nav">
-          <a class="{{ 'is-active' if active_route == 'home' else '' }}" href="/">{{ t('nav.home') }}</a>
-          <a class="{{ 'is-active' if active_route == 'swipe' else '' }}" href="/swipe">{{ t('nav.swipe_cards') }}</a>
+          <a class="{{ 'is-active' if active_route == 'swipe' else '' }}" href="/swipe">{{ 'Свайпать карточки' if lang == 'ru' else 'Swipe Cards' }}</a>
           <a class="{{ 'is-active' if active_route == 'tariffs' else '' }}" href="/tariffs">{{ t('nav.tariffs') }}</a>
-          <a class="{{ 'is-active' if active_route in ['catalog', 'new_order'] else '' }}" href="/me/orders">{{ t('nav.orders') }}</a>
+          <a class="{{ 'is-active' if active_route == 'orders' else '' }}" href="/catalog">{{ 'Заказы' if lang == 'ru' else 'Orders' }}</a>
+          <a class="{{ 'is-active' if active_route == 'community' else '' }}" href="/community?view=chats">{{ 'Чаты/Форумы' if lang == 'ru' else 'Chats/Forums' }}</a>
           {% if is_admin %}
             <a href="/admin">Admin</a>
           {% endif %}
@@ -77,7 +76,7 @@
                 <div class="nav-dropdown__menu nav-dropdown__menu--profile" data-nav-dropdown-menu>
                   <a href="/profile">{{ t('nav.profile') }}</a>
                   <a href="/me/orders">{{ t('nav.my_orders') }}</a>
-                  <a href="/chats">{{ t('nav.chats') }}</a>
+                  <a href="/community?view=chats">{{ 'Чаты/Форумы' if lang == 'ru' else 'Chats/Forums' }}</a>
                   <a href="/test-mode/toggle">{{ t('common.test_mode_on') if demo_mode else t('common.test_mode_off') }}</a>
                   {% if is_admin %}
                     <a href="/admin">Admin</a>
@@ -92,65 +91,6 @@
           {% else %}
             <a class="button button--secondary" href="/auth/demo/1">{{ t('cta.demo_login') }}</a>
           {% endif %}
-=======
-        <div class="topbar__primary">
-          <a class="brand-mark" href="/">
-            <span class="brand-mark__logo">SL</span>
-            <span>
-              <strong>{{ settings.app.name }}</strong>
-              <small>{{ settings.app.brand_tagline }}</small>
-            </span>
-          </a>
-
-          <div class="topbar-actions">
-            <div class="language-switch">
-              <a href="{{ request.url.path }}?lang=ru">{{ t('label.ru') }}</a>
-              <a href="{{ request.url.path }}?lang=en">{{ t('label.en') }}</a>
-            </div>
-            {% if demo_mode %}
-              <span class="badge badge--ghost">{{ t('common.demo_mode') }}</span>
-            {% endif %}
-            {% if user %}
-              <div class="profile-menu" data-profile-menu>
-                <button
-                  class="profile-chip profile-chip--button"
-                  type="button"
-                  aria-expanded="false"
-                  aria-haspopup="true"
-                  data-profile-trigger
-                >
-                  <span class="profile-chip__avatar">{{ user.display_name[:1] }}</span>
-                  <span>
-                    <strong>{{ user.display_name }}</strong>
-                    <small>{{ user.active_tariff or 'Free' }}</small>
-                  </span>
-                  <span class="profile-chip__caret" aria-hidden="true"></span>
-                </button>
-
-                <div class="profile-dropdown" data-profile-dropdown>
-                  <a class="{{ 'is-active' if active_route == 'profile' else '' }}" href="/profile">
-                    {{ t('nav.profile') }}
-                  </a>
-                  <a class="{{ 'is-active' if active_route == 'new_order' else '' }}" href="/orders/new">
-                    {{ t('nav.new_order') }}
-                  </a>
-                  <a class="{{ 'is-active' if active_route == 'tariffs' else '' }}" href="/tariffs">
-                    {{ t('nav.tariffs') }}
-                  </a>
-                </div>
-              </div>
-            {% else %}
-              <a class="button button--secondary" href="/auth/demo/1">{{ t('cta.demo_login') }}</a>
-            {% endif %}
-          </div>
-        </div>
-
-        <div class="topbar__secondary">
-          <nav class="main-nav">
-            <a class="{{ 'is-active' if active_route == 'catalog' else '' }}" href="/catalog">{{ t('nav.catalog') }}</a>
-            <a class="{{ 'is-active' if active_route == 'swipe' else '' }}" href="/swipe">{{ t('nav.swipe') }}</a>
-          </nav>
->>>>>>> e6e82a4e89c6483903aa1ddb57dc85448746ce8e
         </div>
       </header>
 

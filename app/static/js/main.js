@@ -56,7 +56,6 @@ function wireBudgetPreview() {
   render();
 }
 
-<<<<<<< HEAD
 function wireNavDropdowns() {
   const dropdowns = document.querySelectorAll("[data-nav-dropdown]");
   if (!dropdowns.length) return;
@@ -93,48 +92,11 @@ function wireNavDropdowns() {
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
     closeAll(null);
-=======
-function wireProfileMenu() {
-  const menu = document.querySelector("[data-profile-menu]");
-  if (!menu) return;
-
-  const trigger = menu.querySelector("[data-profile-trigger]");
-  const dropdown = menu.querySelector("[data-profile-dropdown]");
-  if (!trigger || !dropdown) return;
-
-  const setOpen = (isOpen) => {
-    menu.classList.toggle("is-open", isOpen);
-    trigger.setAttribute("aria-expanded", String(isOpen));
-  };
-
-  trigger.addEventListener("click", () => {
-    setOpen(!menu.classList.contains("is-open"));
-  });
-
-  dropdown.querySelectorAll("a").forEach((link) => {
-    link.addEventListener("click", () => setOpen(false));
-  });
-
-  document.addEventListener("click", (event) => {
-    if (!menu.contains(event.target)) {
-      setOpen(false);
-    }
-  });
-
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") {
-      setOpen(false);
-    }
->>>>>>> e6e82a4e89c6483903aa1ddb57dc85448746ce8e
   });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   syncTagPickers();
   wireBudgetPreview();
-<<<<<<< HEAD
   wireNavDropdowns();
-=======
-  wireProfileMenu();
->>>>>>> e6e82a4e89c6483903aa1ddb57dc85448746ce8e
 });
