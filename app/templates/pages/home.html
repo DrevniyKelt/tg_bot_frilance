@@ -1,98 +1,128 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <div class="home-page">
-    <section class="hero hero--home">
-      <div class="hero-copy hero-copy--home">
-        <span class="eyebrow">{{ t('hero.kicker') }}</span>
-        <h1>{{ t('hero.title') }}</h1>
-        <p class="hero-copy__lead">{{ t('hero.subtitle') }}</p>
-        <div class="hero-actions">
-          <a class="button" href="/catalog">{{ t('nav.catalog') }}</a>
-          <a class="button button--secondary" href="/swipe">{{ t('nav.swipe') }}</a>
+  <div class="landing-page landing-page--fresh">
+    <section class="landing-signal">
+      <div class="card landing-signal__copy">
+        <span class="eyebrow">{{ "✨ Fresh beta" if lang == 'en' else "✨ Свежая бета" }}</span>
+        <h1>
+          {{ "A cleaner way to match people and projects" if lang == 'en' else "Новый свежий взгляд на биржи" }}
+        </h1>
+        <p class="landing-lead">
+          {{ "Swipe profiles or orders. Left means pass, right means accept. When both sides choose each other, you get a match and move straight into the dialogue." if lang == 'en' else "Листай анкеты или заказы. Свайп влево — отказ. Свайп вправо — принять. Если выбор совпал, появляется мэтч и можно сразу переходить в диалог." }}
+        </p>
+
+        <div class="landing-punch">
+          <p>{{ "💥 Feels like a match?" if lang == 'en' else "💥 Кажется, у вас match?" }}</p>
+          <p>{{ "🤝 Great. Start the collaboration." if lang == 'en' else "🤝 Отлично. Начинайте сотрудничество." }}</p>
         </div>
-        <ul class="feature-strip feature-strip--home">
-          <li>OpenAPI-first schemas</li>
-          <li>RU / EN UI</li>
-          <li>Stack synonyms and ranking</li>
-        </ul>
+
+        <div class="hero-actions landing-actions">
+          <a class="button" href="/register">{{ "Quick registration" if lang == 'en' else "Быстрая регистрация" }}</a>
+          <a class="button button--secondary" href="/swipe">{{ "Open swipe" if lang == 'en' else "Открыть свайпы" }}</a>
+        </div>
       </div>
 
-      <aside class="hero-panel hero-panel--roadmap card">
-        <strong>{{ t('section.roadmap_half') }}</strong>
-        <ul class="plain-list plain-list--checks">
-          <li>{{ t('hero.kicker') }}</li>
-          <li>{{ t('profile.subtitle') }}</li>
-          <li>{{ t('catalog.subtitle') }}</li>
-          <li>Demo login, SEO sitemap, API docs and tests</li>
-        </ul>
-        <a class="button button--secondary" href="/docs">{{ t('common.open_api') }}</a>
-        {% if sidebar_ad %}
-          <article class="promo-card">
-            <span class="eyebrow">{{ t('common.sponsored') }}</span>
-            <h3>{{ sidebar_ad.title }}</h3>
-            <p class="muted">{{ sidebar_ad.body }}</p>
-            <a class="button" href="/ads/click/{{ sidebar_ad.code }}">{{ t('common.open') }}</a>
-          </article>
-        {% endif %}
+      <aside class="landing-signal__cta">
+        <a class="card landing-cta-card" href="/register">
+          <span class="eyebrow">{{ "🚀 Start here" if lang == 'en' else "🚀 Старт здесь" }}</span>
+          <strong>{{ "Quick registration" if lang == 'en' else "Быстрая регистрация" }}</strong>
+        </a>
       </aside>
     </section>
 
-    <section class="section section--home-orders">
-      <div class="section-heading">
+    <section class="landing-role-grid">
+      <article class="card landing-role landing-role--client">
+        <span class="eyebrow">{{ "🧭 If you are a client" if lang == 'en' else "🧭 Если ты заказчик" }}</span>
+        <h2>{{ "Set filters and swipe real executor profiles" if lang == 'en' else "Выбери стек и листай реальные анкеты исполнителей" }}</h2>
+        <p class="muted">
+          {{ "Pick stack, tune the search, and browse complete profiles with examples, specialization, and full context before the first message." if lang == 'en' else "Выбери стек, настрой фильтры и листай анкеты с примерами работ, специализацией и полной информацией еще до первого сообщения." }}
+        </p>
+        <p class="landing-role__accent">
+          {{ "✅ When the choice becomes mutual, you get a match and the order can move into production." if lang == 'en' else "✅ Если выбор взаимный, появляется мэтч и заказ можно быстро переводить в работу." }}
+        </p>
+      </article>
+
+      <article class="card landing-role landing-role--executor">
+        <span class="eyebrow">{{ "⚡ If you are an executor" if lang == 'en' else "⚡ Если ты исполнитель" }}</span>
+        <h2>{{ "Choose your stack and swipe orders that fit you" if lang == 'en' else "Выбери свой стек и листай заказы, которые подходят тебе" }}</h2>
+        <p class="muted">
+          {{ "Tune your lane, choose the order type, payment model, and direction. Browse real projects instead of a noisy stream of random leads." if lang == 'en' else "Настрой свою траекторию, выбери тип заказов, оплату и направление. Листай реальные проекты вместо шумного потока случайных лидов." }}
+        </p>
+        <p class="landing-role__accent">
+          {{ "💸 Strong fit leads to faster matches and faster earning." if lang == 'en' else "💸 Хорошее совпадение быстрее приводит к мэтчу и первой оплате." }}
+        </p>
+      </article>
+    </section>
+
+    <section class="landing-examples">
+      <div class="section-heading section-heading--compact">
         <div>
-          <span class="eyebrow">{{ t('section.featured_orders') }}</span>
-          <h2>{{ t('section.first_beta_orders') }}</h2>
+          <span class="eyebrow">{{ "🪪 Sample profiles" if lang == 'en' else "🪪 Примеры анкет" }}</span>
+          <h2>{{ "How profile cards can look" if lang == 'en' else "Как могут выглядеть анкеты" }}</h2>
         </div>
-        <a class="button button--secondary" href="/catalog">{{ t('common.open') }}</a>
+        <a class="button button--secondary" href="/register">{{ "Join beta" if lang == 'en' else "Перейти к регистрации" }}</a>
       </div>
-      <div class="card-grid card-grid--orders">
-        {% for order in orders %}
-          {% include "components/order_card.html" %}
-        {% endfor %}
+
+      <div class="landing-profile-grid">
+        <article class="card landing-profile">
+          <div class="landing-profile__head">
+            <div class="landing-profile__avatar">👩</div>
+            <div>
+              <h3>Lena Morozova</h3>
+              <p class="muted">{{ "Product designer • UX / Figma" if lang == 'en' else "Продуктовый дизайнер • UX / Figma" }}</p>
+            </div>
+          </div>
+          <p>{{ "Designs onboarding, landing pages, and product flows for closed betas." if lang == 'en' else "Собирает onboarding, лендинги и продуктовые сценарии для закрытых бет." }}</p>
+          <div class="tag-row">
+            <span class="tag-chip">Figma</span>
+            <span class="tag-chip">UX Research</span>
+            <span class="tag-chip">Landing</span>
+          </div>
+        </article>
+
+        <article class="card landing-profile">
+          <div class="landing-profile__head">
+            <div class="landing-profile__avatar">👨</div>
+            <div>
+              <h3>Ivan Petrov</h3>
+              <p class="muted">{{ "DevOps • Kubernetes / Docker" if lang == 'en' else "DevOps • Kubernetes / Docker" }}</p>
+            </div>
+          </div>
+          <p>{{ "Builds infra, release contour, observability, and cost visibility for MVP teams." if lang == 'en' else "Собирает инфраструктуру, релизный контур, observability и cost visibility для MVP-команд." }}</p>
+          <div class="tag-row">
+            <span class="tag-chip">Docker</span>
+            <span class="tag-chip">Kubernetes</span>
+            <span class="tag-chip">Terraform</span>
+          </div>
+        </article>
+
+        <article class="card landing-profile">
+          <div class="landing-profile__head">
+            <div class="landing-profile__avatar">🧑</div>
+            <div>
+              <h3>Maksim Kiselev</h3>
+              <p class="muted">{{ "Backend • FastAPI / PostgreSQL" if lang == 'en' else "Backend • FastAPI / PostgreSQL" }}</p>
+            </div>
+          </div>
+          <p>{{ "Ships API-heavy MVPs, admin panels, integrations, and internal product tools." if lang == 'en' else "Запускает API-heavy MVP, админки, интеграции и внутренние продуктовые инструменты." }}</p>
+          <div class="tag-row">
+            <span class="tag-chip">Python</span>
+            <span class="tag-chip">FastAPI</span>
+            <span class="tag-chip">PostgreSQL</span>
+          </div>
+        </article>
       </div>
     </section>
 
-    <section class="section split split--home">
-      <div class="card card--stack">
-        <span class="eyebrow">{{ t('section.featured_stack') }}</span>
-        <h2>{{ t('section.stack_entity') }}</h2>
-        <p class="muted">{{ t('section.stack_entity_text') }}</p>
-        <div class="stack-columns">
-          {% for category in stack_catalog %}
-            <section>
-              <h3>{{ category.name }}</h3>
-              <div class="tag-row">
-                {% for tag in category.tags[:4] %}
-                  <span class="tag-chip">{{ tag.name }}</span>
-                {% endfor %}
-              </div>
-            </section>
-          {% endfor %}
-        </div>
+    <section class="landing-register-band card">
+      <div>
+        <span class="eyebrow">{{ "🎯 Enter the beta" if lang == 'en' else "🎯 Зайти в бету" }}</span>
+        <h2>{{ "Choose a role, add your stack, and start from the right side of the product" if lang == 'en' else "Выбери роль, добавь стек и зайди в продукт с правильной точки входа" }}</h2>
       </div>
-
-      <div class="card card--tariffs">
-        <span class="eyebrow">{{ t('section.tariffs') }}</span>
-        <h2>{{ t('section.tariffs_limits') }}</h2>
-        <div class="pricing-stack">
-          {% for tariff in tariffs %}
-            <article class="pricing-card">
-              <strong>{{ tariff.name_ru if lang == 'ru' else tariff.name_en }}</strong>
-              <span class="pricing-card__price">{{ format_money(tariff.price_rub) }} RUB</span>
-              <ul class="plain-list">
-                <li>{{ tariff.create_orders_per_day }} {{ t('tariffs.posts_per_day') }}</li>
-                <li>{{ tariff.bids_per_day }} {{ t('tariffs.bids_per_day') }}</li>
-                <li>{{ "Без рекламы" if lang == 'ru' and tariff.ads_disabled else "Реклама снижена" if lang == 'ru' else "Ads off" if tariff.ads_disabled else "Ads reduced" }}</li>
-              </ul>
-            </article>
-          {% endfor %}
-          <div class="addon-strip">
-            {% for addon in addons %}
-              <span class="addon-pill">{{ addon.name_ru if lang == 'ru' else addon.name_en }} · {{ format_money(addon.price_rub) }} RUB</span>
-            {% endfor %}
-          </div>
-        </div>
+      <div class="hero-actions">
+        <a class="button" href="/register">{{ "Open registration" if lang == 'en' else "Открыть регистрацию" }}</a>
+        <a class="button button--secondary" href="/catalog">{{ "See orders first" if lang == 'en' else "Сначала посмотреть заказы" }}</a>
       </div>
     </section>
   </div>

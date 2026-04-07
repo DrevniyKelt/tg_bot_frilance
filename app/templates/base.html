@@ -19,7 +19,7 @@
   <body>
     <div class="page-shell">
       <header class="topbar">
-        <a class="brand-mark" href="/swipe">
+        <a class="brand-mark" href="/">
           <span class="brand-mark__logo">SL</span>
           <span>
             <strong>{{ settings.app.name }}</strong>
@@ -89,7 +89,7 @@
               </div>
             </div>
           {% else %}
-            <a class="button button--secondary" href="/auth/demo/1">{{ t('cta.demo_login') }}</a>
+            <a class="button" href="/register">{{ "Регистрация" if lang == 'ru' else "Register" }}</a>
           {% endif %}
         </div>
       </header>

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="register-page register-page--simple">
+    <section class="register-simple">
+      <div class="card register-copy">
+        <span class="eyebrow">{{ "Registration" if lang == 'en' else "Регистрация" }}</span>
+        <h1>{{ "Get your access to SkillLane" if lang == 'en' else "Получи доступ к SkillLane" }}</h1>
+        <p class="lead">
+          {{ "Leave your email and get the beta code. Or continue through Google or Telegram in one tap." if lang == 'en' else "Оставь email и получи код для входа в бету. Или продолжи через Google или Telegram в один клик." }}
+        </p>
+      </div>
+
+      <div class="card register-simple__panel">
+        {% if submitted %}
+          <div class="alert alert--success">
+            {{ "The request was accepted in mock mode. The next step can later be connected to real auth." if lang == 'en' else "Заявка принята в mock-режиме. Следующий шаг позже можно подключить к реальной авторизации." }}
+          </div>
+        {% endif %}
+
+        <form method="post" action="/register" class="register-simple__form">
+          <label>
+            <span>Email</span>
+            <input type="email" name="email" required placeholder="name@example.com" />
+          </label>
+          <button class="button register-simple__submit" type="submit">
+            {{ "Get code" if lang == 'en' else "Получить код" }}
+          </button>
+        </form>
+
+        <div class="register-socials">
+          <a class="register-social register-social--google" href="/auth/demo/1">
+            <span class="register-social__icon">G</span>
+            <span>{{ "Continue with Google" if lang == 'en' else "Войти через Google" }}</span>
+          </a>
+          <a class="register-social register-social--telegram" href="/auth/demo/1">
+            <span class="register-social__icon">T</span>
+            <span>{{ "Continue with Telegram" if lang == 'en' else "Войти через Telegram" }}</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </div>
+{% endblock %}

@@ -103,8 +103,54 @@ def _auth_redirect() -> RedirectResponse:
 
 
 @router.get("/")
-async def home() -> RedirectResponse:
-    return RedirectResponse(url="/swipe", status_code=303)
+async def home(request: Request, session: AsyncSession = Depends(get_db_session)) -> Response:
+    user = await resolve_current_user(session, request)
+    locale = detect_locale(request, get_settings())
+    orders = await list_orders(session, locale=locale)
+    stack_catalog = await get_stack_catalog(session, locale)
+    tariffs = await list_tariffs(session)
+    sidebar_ad = await get_active_ad_for_placement(session, "home_sidebar")
+    if sidebar_ad:
+        sidebar_ad = await record_ad_impression(session, sidebar_ad.code)
+    context = _build_context(
+        request,
+        title="SkillLane",
+        active_route="landing",
+        user=user,
+        featured_orders=orders.items[:3],
+        stack_catalog=stack_catalog[:4],
+        tariffs=tariffs,
+        sidebar_ad=serialize_ad_campaign(sidebar_ad) if sidebar_ad else None,
+    )
+    return _template_response(request, "pages/home.html", context)
+
+
+@router.get("/register")
+async def register_page(
+    request: Request,
+    submitted: int = Query(default=0),
+    session: AsyncSession = Depends(get_db_session),
+) -> Response:
+    user = await resolve_current_user(session, request)
+    locale = detect_locale(request, get_settings())
+    tariffs = await list_tariffs(session)
+    context = _build_context(
+        request,
+        title="Register",
+        active_route="register",
+        user=user,
+        submitted=bool(submitted),
+        tariffs=tariffs,
+    )
+    return _template_response(request, "pages/register.html", context)
+
+
+@router.post("/register")
+async def register_submit(
+    email: str = Form(...),
+) -> RedirectResponse:
+    _ = email
+    return RedirectResponse(url="/register?submitted=1", status_code=303)
 
 
 @router.get("/catalog")

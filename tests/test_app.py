@@ -4,11 +4,18 @@ from decimal import Decimal
 
 
 def test_home_page_renders(client):
-    response = client.get("/", follow_redirects=True)
+    response = client.get("/")
 
     assert response.status_code == 200
     assert "SkillLane" in response.text
-    assert "Swipe" in response.text
+    assert "/register" in response.text
+
+
+def test_register_page_renders(client):
+    response = client.get("/register")
+
+    assert response.status_code == 200
+    assert "регистра" in response.text.lower() or "register" in response.text.lower()
 
 
 def test_stack_synonym_search_normalizes_filters(client):
@@ -377,7 +384,7 @@ def test_swipe_order_cards_show_inverse_state_for_executor(client):
 
 
 def test_test_mode_toggle_disables_and_enables_demo_login(client):
-    enabled_home = client.get("/", follow_redirects=True)
+    enabled_home = client.get("/")
     assert enabled_home.status_code == 200
     assert "/logout" in enabled_home.text
 
